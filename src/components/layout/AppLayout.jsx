@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
+import MedicalAssistant from './MedicalAssistant';
 
 export default function AppLayout() {
   return (
@@ -11,6 +12,7 @@ export default function AppLayout() {
         <Outlet />
       </main>
       <Footer />
+      <MedicalAssistant />
     </div>
   );
 }

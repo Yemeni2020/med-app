@@ -1,16 +1,27 @@
-# React + Vite
+# MedBlog
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Local setup
 
-Currently, two official plugins are available:
+1. Copy `.env.example` to `.env`
+2. Set `OPENAI_API_KEY`
+3. Optionally set `OPENAI_MODEL` if you do not want the default `gpt-5.5`
+4. Run `npm install`
+5. Run `npm run dev`
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Medical AI assistant
 
-## React Compiler
+This app includes a serious medical information assistant for visitors.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- The browser calls `/api/medical-assistant`
+- The API key stays on the server side
+- In local development and `vite preview`, the route is mounted by Vite middleware
 
-## Expanding the ESLint configuration
+The assistant is deliberately constrained:
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- health topics only
+- no jokes or roleplay
+- no fake certainty
+- no diagnosis claims
+- emergency escalation for red-flag symptoms
+
+For production, you need to deploy an equivalent server-side route that keeps `OPENAI_API_KEY` private.
