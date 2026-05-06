@@ -19,7 +19,7 @@ const newsCategoryColors = {
 };
 
 export default function MedicalNews() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [filter, setFilter] = useState('all');
 
   const { data: dbNews = [], isLoading } = useQuery({
@@ -56,7 +56,7 @@ export default function MedicalNews() {
             className="cursor-pointer px-4 py-1.5 text-sm rounded-full"
             onClick={() => setFilter(cat)}
           >
-            {cat === 'all' ? t.common.all : cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+            {cat === 'all' ? t.common.all : t.newsPage.categories[cat]}
           </Badge>
         ))}
       </div>
@@ -98,17 +98,17 @@ export default function MedicalNews() {
                           {item.category?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                         </Badge>
                       </div>
-                      <h3 className="text-lg font-serif font-bold mb-2 group-hover:text-primary transition-colors">{item.title}</h3>
-                      <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{item.summary}</p>
+                      <h3 className="text-lg font-serif font-bold mb-2 group-hover:text-primary transition-colors">{lang === 'ar' && item.title_ar ? item.title_ar : item.title}</h3>
+                      <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{lang === 'ar' && item.summary_ar ? item.summary_ar : item.summary}</p>
                       <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                        <span className="font-medium">{item.source}</span>
+                        <span className="font-medium">{lang === 'ar' && item.source_ar ? item.source_ar : item.source}</span>
                         <span className="flex items-center gap-1">
                           <Clock className="w-3 h-3" />
                           {format(new Date(item.created_date), 'MMM d, yyyy')}
                         </span>
                         {item.source_url && (
                           <a href={item.source_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-primary hover:underline">
-                            <ExternalLink className="w-3 h-3" /> Source
+                            <ExternalLink className="w-3 h-3" /> {t.newsPage.sourceLink}
                           </a>
                         )}
                       </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useLanguage } from '@/lib/LanguageContext';
 import { useQuery } from '@tanstack/react-query';
 import { listArticles } from '@/lib/local-data';
@@ -22,7 +22,7 @@ const CATEGORY_ICONS = {
 };
 
 export default function Articles() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
 
@@ -38,8 +38,14 @@ export default function Articles() {
     queryFn: () => listArticles(50),
   });
 
-  const filtered = articles.filter(a => {
-    const matchSearch = !search || a.title?.toLowerCase().includes(search.toLowerCase()) || a.excerpt?.toLowerCase().includes(search.toLowerCase());
+  const localizedArticles = useMemo(() => articles.map((article) => ({
+    ...article,
+    displayTitle: lang === 'ar' && article.title_ar ? article.title_ar : article.title,
+    displayExcerpt: lang === 'ar' && article.excerpt_ar ? article.excerpt_ar : article.excerpt,
+  })), [articles, lang]);
+
+  const filtered = localizedArticles.filter(a => {
+    const matchSearch = !search || a.displayTitle?.toLowerCase().includes(search.toLowerCase()) || a.displayExcerpt?.toLowerCase().includes(search.toLowerCase());
     const matchCategory = activeCategory === 'all' || a.category === activeCategory;
     return matchSearch && matchCategory;
   });
@@ -51,7 +57,7 @@ export default function Articles() {
 
       {/* Header + Search */}
       <div className="mb-10">
-        <p className="text-sm font-semibold text-primary uppercase tracking-widest mb-2">Medical Library</p>
+        <p className="text-sm font-semibold text-primary uppercase tracking-widest mb-2">{t.articlesPage.library}</p>
         <h1 className="text-3xl md:text-4xl font-serif font-bold mb-6">{t.nav.articles}</h1>
 
         {/* Search bar */}
@@ -62,7 +68,7 @@ export default function Articles() {
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder={t.common.search + ' articles, topics, authors...'}
+              placeholder={`${t.common.search} ${t.articlesPage.searchSuffix}`}
               className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground/60 text-foreground"
             />
             <AnimatePresence>
@@ -81,7 +87,7 @@ export default function Articles() {
           </div>
           {search && (
             <p className="text-xs text-muted-foreground mt-2 ml-1">
-              {filtered.length} result{filtered.length !== 1 ? 's' : ''} for "<span className="text-foreground font-medium">{search}</span>"
+              {filtered.length} {filtered.length === 1 ? t.articlesPage.resultFor : t.articlesPage.resultsFor} "<span className="text-foreground font-medium">{search}</span>"
             </p>
           )}
         </div>
@@ -89,7 +95,7 @@ export default function Articles() {
 
       {/* Category filter */}
       <div className="mb-8">
-        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Filter by specialty</p>
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">{t.articlesPage.filterBySpecialty}</p>
         <div className="flex gap-2 flex-wrap">
           {categories.map(cat => (
             <motion.button
@@ -119,7 +125,7 @@ export default function Articles() {
         <div className="text-center py-20 text-muted-foreground">
           <div className="text-5xl mb-4">🔍</div>
           <p className="text-lg font-medium">{t.common.noResults}</p>
-          <p className="text-sm mt-1">Try a different keyword or category</p>
+          <p className="text-sm mt-1">{t.articlesPage.tryDifferentKeyword}</p>
         </div>
       ) : (
         <motion.div

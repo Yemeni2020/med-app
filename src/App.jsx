@@ -22,6 +22,7 @@ import Doctors from '@/pages/Doctors';
 import SavedArticles from '@/pages/SavedArticles';
 import SymptomChecker from '@/pages/SymptomChecker';
 import HealthDashboard from '@/pages/HealthDashboard';
+import AdminKnowledgeBase from '@/pages/AdminKnowledgeBase';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -58,6 +59,7 @@ const AuthenticatedApp = () => {
         <Route path="/saved" element={<SavedArticles />} />
         <Route path="/symptom-checker" element={<SymptomChecker />} />
         <Route path="/dashboard" element={<HealthDashboard />} />
+        <Route path="/admin/knowledge-base" element={<AdminKnowledgeBase />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

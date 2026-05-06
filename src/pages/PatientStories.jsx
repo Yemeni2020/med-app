@@ -16,7 +16,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
 
 export default function PatientStories() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ title: '', story: '', condition: '', is_anonymous: false, display_name: '' });
   const queryClient = useQueryClient();
@@ -66,27 +66,27 @@ export default function PatientStories() {
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label>Title</Label>
-                <Input value={form.title} onChange={e => setForm({...form, title: e.target.value})} placeholder="My recovery journey..." className="rounded-xl" required />
+                <Label>{t.patientStoriesForm.title}</Label>
+                <Input value={form.title} onChange={e => setForm({...form, title: e.target.value})} placeholder={t.patientStoriesForm.titlePlaceholder} className="rounded-xl" required />
               </div>
               <div className="space-y-2">
-                <Label>Medical Condition</Label>
-                <Input value={form.condition} onChange={e => setForm({...form, condition: e.target.value})} placeholder="e.g. Type 2 Diabetes" className="rounded-xl" required />
+                <Label>{t.patientStoriesForm.condition}</Label>
+                <Input value={form.condition} onChange={e => setForm({...form, condition: e.target.value})} placeholder={t.patientStoriesForm.conditionPlaceholder} className="rounded-xl" required />
               </div>
               <div className="space-y-2">
-                <Label>Your Story</Label>
-                <Textarea value={form.story} onChange={e => setForm({...form, story: e.target.value})} placeholder="Share your experience..." className="rounded-xl min-h-[150px]" required />
+                <Label>{t.patientStoriesForm.story}</Label>
+                <Textarea value={form.story} onChange={e => setForm({...form, story: e.target.value})} placeholder={t.patientStoriesForm.storyPlaceholder} className="rounded-xl min-h-[150px]" required />
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Switch checked={form.is_anonymous} onCheckedChange={v => setForm({...form, is_anonymous: v})} />
-                  <Label>Post anonymously</Label>
+                  <Label>{t.patientStoriesForm.anonymous}</Label>
                 </div>
               </div>
               {!form.is_anonymous && (
                 <div className="space-y-2">
-                  <Label>Display Name</Label>
-                  <Input value={form.display_name} onChange={e => setForm({...form, display_name: e.target.value})} placeholder="Your name" className="rounded-xl" />
+                  <Label>{t.patientStoriesForm.displayName}</Label>
+                  <Input value={form.display_name} onChange={e => setForm({...form, display_name: e.target.value})} placeholder={t.patientStoriesForm.displayNamePlaceholder} className="rounded-xl" />
                 </div>
               )}
               <Button type="submit" className="w-full rounded-xl" disabled={createMutation.isPending}>
@@ -119,14 +119,14 @@ export default function PatientStories() {
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div>
-                      <Badge variant="secondary" className="mb-2">{story.condition}</Badge>
-                      <h3 className="text-lg font-serif font-bold">{story.title}</h3>
+                      <Badge variant="secondary" className="mb-2">{lang === 'ar' && story.condition_ar ? story.condition_ar : story.condition}</Badge>
+                      <h3 className="text-lg font-serif font-bold">{lang === 'ar' && story.title_ar ? story.title_ar : story.title}</h3>
                     </div>
                     <Quote className="w-8 h-8 text-primary/20" />
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground text-sm leading-relaxed line-clamp-4">{story.story}</p>
+                  <p className="text-muted-foreground text-sm leading-relaxed line-clamp-4">{lang === 'ar' && story.story_ar ? story.story_ar : story.story}</p>
                   <div className="flex items-center gap-2 mt-4 pt-4 border-t border-border/50">
                     <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
                       <User className="w-4 h-4 text-muted-foreground" />

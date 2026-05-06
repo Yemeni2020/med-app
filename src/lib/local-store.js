@@ -88,3 +88,40 @@ export function saveNewsletterSubscription(subscription) {
     },
   ]);
 }
+
+export function listMedicalKnowledgeSources() {
+  return read('medicalKnowledgeSources');
+}
+
+export function saveMedicalKnowledgeSource(source) {
+  const created = {
+    id: source.id || createId(),
+    created_date: new Date().toISOString(),
+    ...source,
+  };
+
+  write('medicalKnowledgeSources', [created, ...listMedicalKnowledgeSources().filter((item) => item.id !== created.id)]);
+  return created;
+}
+
+export function importMedicalKnowledgeSources(sources) {
+  const existing = listMedicalKnowledgeSources();
+  const byId = new Map(existing.map((source) => [source.id, source]));
+
+  for (const source of sources) {
+    const id = source.id || createId();
+    byId.set(id, {
+      id,
+      created_date: source.created_date || new Date().toISOString(),
+      ...source,
+    });
+  }
+
+  const merged = Array.from(byId.values());
+  write('medicalKnowledgeSources', merged);
+  return merged;
+}
+
+export function deleteMedicalKnowledgeSource(id) {
+  write('medicalKnowledgeSources', listMedicalKnowledgeSources().filter((source) => source.id !== id));
+}

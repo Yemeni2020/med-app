@@ -3,13 +3,15 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { Button } from '@/components/ui/button';
 import { Trash2, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { format } from 'date-fns';
+import { useLanguage } from '@/lib/LanguageContext';
 
 export default function MetricChart({ data, meta, onDelete }) {
+  const { t, lang } = useLanguage();
   const [showTable, setShowTable] = useState(false);
 
   const chartData = data.map(d => ({
     ...d,
-    date: format(new Date(d.recorded_date), 'MMM d'),
+    date: format(new Date(d.recorded_date), lang === 'ar' ? 'd MMM' : 'MMM d'),
     fullDate: d.recorded_date,
   }));
 
@@ -24,19 +26,19 @@ export default function MetricChart({ data, meta, onDelete }) {
     <div className="bg-card border border-border rounded-2xl p-5">
       <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
         <div>
-          <h3 className="font-semibold text-lg">{meta.label} History</h3>
+          <h3 className="font-semibold text-lg">{meta.label} {t.metricChart.history}</h3>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span>{data.length} entries</span>
+            <span>{data.length} {t.metricChart.entries}</span>
             {previous !== undefined && (
               <span className={`flex items-center gap-0.5 font-medium ${trendColor}`}>
                 <TrendIcon className="w-3.5 h-3.5" />
-                {Math.abs(trend).toFixed(1)} {meta.unit} vs prev
+                {Math.abs(trend).toFixed(1)} {meta.unit} {t.metricChart.vsPrev}
               </span>
             )}
           </div>
         </div>
         <Button variant="ghost" size="sm" onClick={() => setShowTable(t => !t)} className="text-xs rounded-lg">
-          {showTable ? 'Show Chart' : 'Show Table'}
+          {showTable ? t.metricChart.showChart : t.metricChart.showTable}
         </Button>
       </div>
 
@@ -65,9 +67,9 @@ export default function MetricChart({ data, meta, onDelete }) {
           <table className="w-full text-sm">
             <thead>
               <tr className="text-xs text-muted-foreground border-b border-border">
-                <th className="text-left pb-2 font-medium">Date</th>
-                <th className="text-right pb-2 font-medium">Value</th>
-                <th className="text-left pb-2 font-medium pl-3">Notes</th>
+                <th className="text-left pb-2 font-medium">{t.metricChart.date}</th>
+                <th className="text-right pb-2 font-medium">{t.metricChart.value}</th>
+                <th className="text-left pb-2 font-medium pl-3">{t.metricChart.notes}</th>
                 <th className="pb-2" />
               </tr>
             </thead>

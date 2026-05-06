@@ -3,8 +3,10 @@ import { Bookmark } from 'lucide-react';
 import { useSavedArticles } from '@/lib/SavedArticlesContext';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/lib/LanguageContext';
 
 export default function BookmarkButton({ item, className = '', size = 'default' }) {
+  const { lang } = useLanguage();
   const { isSaved, toggleSave } = useSavedArticles();
   const saved = isSaved(item.item_id);
 
@@ -12,7 +14,9 @@ export default function BookmarkButton({ item, className = '', size = 'default' 
     e.preventDefault();
     e.stopPropagation();
     await toggleSave(item);
-    toast(saved ? 'Removed from saved articles' : 'Saved to your reading list', {
+    toast(saved
+      ? (lang === 'ar' ? 'تمت إزالة العنصر من المحفوظات' : 'Removed from saved articles')
+      : (lang === 'ar' ? 'تمت إضافة العنصر إلى قائمة القراءة' : 'Saved to your reading list'), {
       icon: saved ? '🗑️' : '🔖',
       duration: 2500,
     });
@@ -32,7 +36,9 @@ export default function BookmarkButton({ item, className = '', size = 'default' 
         sizeClasses,
         className
       )}
-      title={saved ? 'Remove bookmark' : 'Bookmark this article'}
+      title={saved
+        ? (lang === 'ar' ? 'إزالة الحفظ' : 'Remove bookmark')
+        : (lang === 'ar' ? 'حفظ هذا المحتوى' : 'Bookmark this article')}
     >
       <Bookmark className={cn('transition-all', size === 'lg' ? 'w-5 h-5' : 'w-4 h-4', saved && 'fill-primary')} />
     </button>

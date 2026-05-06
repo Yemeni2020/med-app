@@ -3,17 +3,18 @@
 ## Local setup
 
 1. Copy `.env.example` to `.env`
-2. Set `OPENAI_API_KEY`
-3. Optionally set `OPENAI_MODEL` if you do not want the default `gpt-5.5`
-4. Run `npm install`
-5. Run `npm run dev`
+2. Install Ollama from `https://docs.ollama.com/quickstart`
+3. Pull a local model, for example: `ollama pull gemma3`
+4. Optionally change `OLLAMA_MODEL` in `.env`
+5. Run `npm install`
+6. Run `npm run dev`
 
 ## Medical AI assistant
 
 This app includes a serious medical information assistant for visitors.
 
 - The browser calls `/api/medical-assistant`
-- The API key stays on the server side
+- The assistant runs against a local Ollama model
 - In local development and `vite preview`, the route is mounted by Vite middleware
 
 The assistant is deliberately constrained:
@@ -24,4 +25,4 @@ The assistant is deliberately constrained:
 - no diagnosis claims
 - emergency escalation for red-flag symptoms
 
-For production, you need to deploy an equivalent server-side route that keeps `OPENAI_API_KEY` private.
+The knowledge base and citations still work locally. For production, you need a server-side route that can reach your local or self-hosted model runtime.

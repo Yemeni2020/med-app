@@ -17,7 +17,7 @@ const statusStyles = {
 };
 
 export default function ExpertQA() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
 
   const { data: dbSessions = [], isLoading } = useQuery({
     queryKey: ['qa-sessions'],
@@ -61,8 +61,8 @@ export default function ExpertQA() {
           </div>
         </CardHeader>
         <CardContent>
-          <h3 className="text-lg font-serif font-bold mb-3">{session.title}</h3>
-          <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{session.description}</p>
+          <h3 className="text-lg font-serif font-bold mb-3">{lang === 'ar' && session.title_ar ? session.title_ar : session.title}</h3>
+          <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{lang === 'ar' && session.description_ar ? session.description_ar : session.description}</p>
 
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
@@ -84,7 +84,7 @@ export default function ExpertQA() {
               {session.session_date ? format(new Date(session.session_date), 'MMM d, yyyy') : '—'}
             </span>
             {session.specialty && (
-              <Badge variant="secondary" className="text-xs">{session.specialty}</Badge>
+              <Badge variant="secondary" className="text-xs">{lang === 'ar' && session.specialty_ar ? session.specialty_ar : session.specialty}</Badge>
             )}
           </div>
         </CardContent>

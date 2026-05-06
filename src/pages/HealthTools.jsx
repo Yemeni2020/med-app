@@ -14,7 +14,7 @@ export default function HealthTools() {
         <h1 className="text-3xl md:text-4xl font-serif font-bold">{t.nav.healthTools}</h1>
       </div>
       <p className="text-muted-foreground mb-10 max-w-2xl">
-        Interactive health tools to help you understand your health metrics. These tools are for educational purposes only.
+        {t.healthTools.subtitle}
       </p>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
