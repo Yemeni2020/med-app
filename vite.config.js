@@ -28,8 +28,11 @@ function medicalAssistantPlugin() {
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, __dirname, '');
   Object.assign(process.env, env);
+  const isDevelopment = mode === 'development';
+  const basePath = isDevelopment ? '/' : (env.VITE_PUBLIC_BASE_PATH || './');
 
   return {
+    base: basePath,
     logLevel: 'error', // Suppress warnings, only show errors
     plugins: [
       react(),

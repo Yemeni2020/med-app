@@ -1,41 +1,45 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import MedicalAssistant from './MedicalAssistant';
 import { useLanguage } from '@/lib/LanguageContext';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const INITIAL_LOAD_MS = 900;
 const ROUTE_LOAD_MS = 450;
 
-function PageLoadingOverlay({ visible, label }) {
+function PageSkeleton({ label }) {
   return (
-    <AnimatePresence>
-      {visible ? (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.18 }}
-          className="fixed inset-0 z-[120] flex items-center justify-center bg-white/82 backdrop-blur-sm"
-        >
-          <div className="flex flex-col items-center gap-4">
-            <div className="relative h-14 w-14">
-              <motion.div
-                className="absolute inset-0 rounded-full border-4 border-slate-200"
-              />
-              <motion.div
-                className="absolute inset-0 rounded-full border-4 border-transparent border-t-blue-600"
-                animate={{ rotate: 360 }}
-                transition={{ repeat: Infinity, duration: 0.9, ease: 'linear' }}
-              />
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 space-y-8 animate-pulse">
+      <div className="space-y-3">
+        <Skeleton className="h-4 w-28 rounded-full" />
+        <Skeleton className="h-10 w-72 max-w-full rounded-xl" />
+        <Skeleton className="h-5 w-[32rem] max-w-full rounded-xl" />
+      </div>
+
+      <div className="flex flex-wrap gap-3">
+        {[1, 2, 3, 4].map((item) => (
+          <Skeleton key={item} className="h-10 w-28 rounded-xl" />
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        {[1, 2, 3, 4, 5, 6].map((item) => (
+          <div key={item} className="rounded-3xl border border-slate-200 bg-white p-5 space-y-4">
+            <Skeleton className="h-44 w-full rounded-2xl" />
+            <div className="space-y-3">
+              <Skeleton className="h-4 w-24 rounded-full" />
+              <Skeleton className="h-7 w-5/6 rounded-xl" />
+              <Skeleton className="h-4 w-full rounded-xl" />
+              <Skeleton className="h-4 w-4/5 rounded-xl" />
             </div>
-            <p className="text-sm font-medium text-slate-700">{label}</p>
           </div>
-        </motion.div>
-      ) : null}
-    </AnimatePresence>
+        ))}
+      </div>
+
+      <p className="text-sm text-muted-foreground">{label}</p>
+    </div>
   );
 }
 
@@ -45,6 +49,7 @@ export default function AppLayout() {
   const [pageLoading, setPageLoading] = useState(true);
   const timeoutRef = useRef(null);
   const firstLoadRef = useRef(true);
+  const assistantEnabled = import.meta.env.VITE_DISABLE_MEDICAL_ASSISTANT !== 'true';
 
   useEffect(() => {
     setPageLoading(true);
@@ -67,13 +72,12 @@ export default function AppLayout() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <PageLoadingOverlay visible={pageLoading} label={t.common.loading} />
       <Navbar />
       <main className="flex-1">
-        <Outlet />
+        {pageLoading ? <PageSkeleton label={t.common.loading} /> : <Outlet />}
       </main>
       <Footer />
-      <MedicalAssistant />
+      {assistantEnabled ? <MedicalAssistant /> : null}
     </div>
   );
 }

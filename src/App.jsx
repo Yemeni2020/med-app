@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { Toaster as Sonner } from "sonner"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, HashRouter, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
@@ -23,6 +23,8 @@ import SavedArticles from '@/pages/SavedArticles';
 import SymptomChecker from '@/pages/SymptomChecker';
 import HealthDashboard from '@/pages/HealthDashboard';
 import AdminKnowledgeBase from '@/pages/AdminKnowledgeBase';
+
+const Router = import.meta.env.VITE_ROUTER_MODE === 'hash' ? HashRouter : BrowserRouter;
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
