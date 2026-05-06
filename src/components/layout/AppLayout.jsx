@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Navbar from './Navbar';
+import BottomNavbar from './BottomNavbar';
 import Footer from './Footer';
 import MedicalAssistant from './MedicalAssistant';
 import { useLanguage } from '@/lib/LanguageContext';
@@ -73,10 +74,11 @@ export default function AppLayout() {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-1">
+      <main className="flex-1 pb-24 lg:pb-0">
         {pageLoading ? <PageSkeleton label={t.common.loading} /> : <Outlet />}
       </main>
       <Footer />
+      <BottomNavbar />
       {assistantEnabled ? <MedicalAssistant /> : null}
     </div>
   );
