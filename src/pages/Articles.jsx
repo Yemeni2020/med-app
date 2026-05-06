@@ -29,10 +29,6 @@ export default function Articles() {
   const params = new URLSearchParams(window.location.search);
   const urlCategory = params.get('category');
 
-  useEffect(() => {
-    if (urlCategory) setActiveCategory(urlCategory);
-  }, [urlCategory]);
-
   const { data: articles = [], isLoading } = useQuery({
     queryKey: ['articles'],
     queryFn: () => listArticles(50),
@@ -45,12 +41,28 @@ export default function Articles() {
   })), [articles, lang]);
 
   const filtered = localizedArticles.filter(a => {
-    const matchSearch = !search || a.displayTitle?.toLowerCase().includes(search.toLowerCase()) || a.displayExcerpt?.toLowerCase().includes(search.toLowerCase());
+    const query = search.toLowerCase();
+    const matchSearch = !search
+      || a.displayTitle?.toLowerCase().includes(query)
+      || a.displayExcerpt?.toLowerCase().includes(query)
+      || a.author_name?.toLowerCase().includes(query)
+      || a.tags?.some((tag) => String(tag).toLowerCase().includes(query));
     const matchCategory = activeCategory === 'all' || a.category === activeCategory;
     return matchSearch && matchCategory;
   });
 
-  const categories = ['all', ...Object.keys(t.categories)];
+  const categories = useMemo(() => ['all', ...Array.from(new Set(localizedArticles.map((article) => article.category).filter(Boolean)))], [localizedArticles]);
+
+  useEffect(() => {
+    if (!urlCategory) return;
+    setActiveCategory(categories.includes(urlCategory) ? urlCategory : 'all');
+  }, [urlCategory, categories]);
+
+  useEffect(() => {
+    if (activeCategory !== 'all' && !categories.includes(activeCategory)) {
+      setActiveCategory('all');
+    }
+  }, [activeCategory, categories]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">

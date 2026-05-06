@@ -6,42 +6,64 @@ import { Badge } from '@/components/ui/badge';
 import { Search, ExternalLink, BookOpen, Shield } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+const PAGE_COPY = {
+  en: {
+    viewGuideline: 'View Guideline',
+    organizationNames: {
+      WHO: 'World Health Organization',
+      CDC: 'Centers for Disease Control',
+      AHA: 'American Heart Association',
+      NICE: 'National Institute for Health and Care Excellence',
+    },
+  },
+  ar: {
+    viewGuideline: 'عرض الإرشاد',
+    organizationNames: {
+      WHO: 'منظمة الصحة العالمية',
+      CDC: 'مراكز السيطرة على الأمراض',
+      AHA: 'جمعية القلب الأمريكية',
+      NICE: 'المعهد الوطني للتميز الصحي والرعاية',
+    },
+  },
+};
+
 const guidelines = [
   { org: 'WHO', name: 'World Health Organization', items: [
-    { title: 'COVID-19 Clinical Management', url: 'https://www.who.int/publications/i/item/WHO-2019-nCoV-clinical-2021-2', tags: ['respiratory', 'infectious disease', 'COVID-19'] },
-    { title: 'Hypertension Management Guidelines', url: 'https://www.who.int/publications/i/item/9789240033986', tags: ['cardiology', 'hypertension', 'chronic disease'] },
-    { title: 'Mental Health Gap Action Programme', url: 'https://www.who.int/publications/i/item/9789241549790', tags: ['psychiatry', 'mental health', 'depression'] },
-    { title: 'Diabetes Prevention & Management', url: 'https://www.who.int/health-topics/diabetes', tags: ['endocrinology', 'diabetes', 'chronic disease'] },
-    { title: 'Antimicrobial Resistance Guidelines', url: 'https://www.who.int/health-topics/antimicrobial-resistance', tags: ['infectious disease', 'antibiotics', 'AMR'] },
+    { title: 'COVID-19 Clinical Management', title_ar: 'التدبير السريري لكوفيد-19', url: 'https://www.who.int/publications/i/item/WHO-2019-nCoV-clinical-2021-2', tags: ['respiratory', 'infectious disease', 'COVID-19'], tags_ar: ['تنفسي', 'أمراض معدية', 'كوفيد-19'] },
+    { title: 'Hypertension Management Guidelines', title_ar: 'إرشادات تدبير ارتفاع ضغط الدم', url: 'https://www.who.int/publications/i/item/9789240033986', tags: ['cardiology', 'hypertension', 'chronic disease'], tags_ar: ['أمراض القلب', 'ارتفاع الضغط', 'مرض مزمن'] },
+    { title: 'Mental Health Gap Action Programme', title_ar: 'برنامج سد فجوة الصحة النفسية', url: 'https://www.who.int/publications/i/item/9789241549790', tags: ['psychiatry', 'mental health', 'depression'], tags_ar: ['الطب النفسي', 'الصحة النفسية', 'الاكتئاب'] },
+    { title: 'Diabetes Prevention & Management', title_ar: 'الوقاية من السكري وتدبيره', url: 'https://www.who.int/health-topics/diabetes', tags: ['endocrinology', 'diabetes', 'chronic disease'], tags_ar: ['الغدد الصماء', 'السكري', 'مرض مزمن'] },
+    { title: 'Antimicrobial Resistance Guidelines', title_ar: 'إرشادات مقاومة مضادات الميكروبات', url: 'https://www.who.int/health-topics/antimicrobial-resistance', tags: ['infectious disease', 'antibiotics', 'AMR'], tags_ar: ['أمراض معدية', 'مضادات حيوية', 'مقاومة الميكروبات'] },
   ]},
   { org: 'CDC', name: 'Centers for Disease Control', items: [
-    { title: 'Immunization Schedules', url: 'https://www.cdc.gov/vaccines/schedules/', tags: ['pediatrics', 'vaccination', 'preventive'] },
-    { title: 'Antibiotic Prescribing Guidelines', url: 'https://www.cdc.gov/antibiotic-use/', tags: ['antibiotics', 'infectious disease', 'prescribing'] },
-    { title: 'Cancer Screening Guidelines', url: 'https://www.cdc.gov/cancer/dcpc/prevention/', tags: ['oncology', 'screening', 'preventive'] },
-    { title: 'Heart Disease Prevention', url: 'https://www.cdc.gov/heartdisease/', tags: ['cardiology', 'prevention', 'lifestyle'] },
+    { title: 'Immunization Schedules', title_ar: 'جداول التحصين', url: 'https://www.cdc.gov/vaccines/schedules/', tags: ['pediatrics', 'vaccination', 'preventive'], tags_ar: ['طب الأطفال', 'التطعيم', 'وقائي'] },
+    { title: 'Antibiotic Prescribing Guidelines', title_ar: 'إرشادات وصف المضادات الحيوية', url: 'https://www.cdc.gov/antibiotic-use/', tags: ['antibiotics', 'infectious disease', 'prescribing'], tags_ar: ['مضادات حيوية', 'أمراض معدية', 'وصف الدواء'] },
+    { title: 'Cancer Screening Guidelines', title_ar: 'إرشادات فحوصات السرطان', url: 'https://www.cdc.gov/cancer/dcpc/prevention/', tags: ['oncology', 'screening', 'preventive'], tags_ar: ['الأورام', 'الفحص المبكر', 'وقائي'] },
+    { title: 'Heart Disease Prevention', title_ar: 'الوقاية من أمراض القلب', url: 'https://www.cdc.gov/heartdisease/', tags: ['cardiology', 'prevention', 'lifestyle'], tags_ar: ['أمراض القلب', 'وقاية', 'نمط الحياة'] },
   ]},
   { org: 'AHA', name: 'American Heart Association', items: [
-    { title: 'CPR & Emergency Cardiovascular Care', url: 'https://cpr.heart.org/en/resuscitation-science/cpr-and-ecc-guidelines', tags: ['emergency', 'CPR', 'cardiology'] },
-    { title: 'Heart Failure Management', url: 'https://www.heart.org/en/health-topics/heart-failure', tags: ['cardiology', 'heart failure', 'treatment'] },
-    { title: 'Stroke Treatment Protocols', url: 'https://www.heart.org/en/health-topics/stroke', tags: ['neurology', 'stroke', 'emergency'] },
+    { title: 'CPR & Emergency Cardiovascular Care', title_ar: 'الإنعاش القلبي والرعاية القلبية الطارئة', url: 'https://cpr.heart.org/en/resuscitation-science/cpr-and-ecc-guidelines', tags: ['emergency', 'CPR', 'cardiology'], tags_ar: ['طوارئ', 'إنعاش قلبي', 'أمراض القلب'] },
+    { title: 'Heart Failure Management', title_ar: 'تدبير فشل القلب', url: 'https://www.heart.org/en/health-topics/heart-failure', tags: ['cardiology', 'heart failure', 'treatment'], tags_ar: ['أمراض القلب', 'فشل القلب', 'علاج'] },
+    { title: 'Stroke Treatment Protocols', title_ar: 'بروتوكولات علاج السكتة الدماغية', url: 'https://www.heart.org/en/health-topics/stroke', tags: ['neurology', 'stroke', 'emergency'], tags_ar: ['الأعصاب', 'سكتة دماغية', 'طوارئ'] },
   ]},
   { org: 'NICE', name: 'National Institute for Health and Care Excellence', items: [
-    { title: 'Depression in Adults Treatment', url: 'https://www.nice.org.uk/guidance/ng222', tags: ['psychiatry', 'depression', 'mental health'] },
-    { title: 'Type 2 Diabetes Management', url: 'https://www.nice.org.uk/guidance/ng28', tags: ['endocrinology', 'diabetes', 'treatment'] },
-    { title: 'Chronic Pain Management', url: 'https://www.nice.org.uk/guidance/ng193', tags: ['pain management', 'chronic', 'treatment'] },
+    { title: 'Depression in Adults Treatment', title_ar: 'علاج الاكتئاب لدى البالغين', url: 'https://www.nice.org.uk/guidance/ng222', tags: ['psychiatry', 'depression', 'mental health'], tags_ar: ['الطب النفسي', 'الاكتئاب', 'الصحة النفسية'] },
+    { title: 'Type 2 Diabetes Management', title_ar: 'تدبير السكري من النوع الثاني', url: 'https://www.nice.org.uk/guidance/ng28', tags: ['endocrinology', 'diabetes', 'treatment'], tags_ar: ['الغدد الصماء', 'السكري', 'علاج'] },
+    { title: 'Chronic Pain Management', title_ar: 'تدبير الألم المزمن', url: 'https://www.nice.org.uk/guidance/ng193', tags: ['pain management', 'chronic', 'treatment'], tags_ar: ['تدبير الألم', 'مزمن', 'علاج'] },
   ]},
 ];
 
 export default function Guidelines() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+  const copy = PAGE_COPY[lang] || PAGE_COPY.en;
   const [search, setSearch] = useState('');
 
   const filteredGuidelines = guidelines.map(group => ({
     ...group,
     items: group.items.filter(item =>
       !search ||
-      item.title.toLowerCase().includes(search.toLowerCase()) ||
-      item.tags.some(tag => tag.toLowerCase().includes(search.toLowerCase()))
+      (lang === 'ar' && item.title_ar ? item.title_ar : item.title).toLowerCase().includes(search.toLowerCase()) ||
+      (lang === 'ar' && item.tags_ar ? item.tags_ar : item.tags).some(tag => tag.toLowerCase().includes(search.toLowerCase()))
     ),
   })).filter(group => group.items.length > 0);
 
@@ -78,16 +100,16 @@ export default function Guidelines() {
               </div>
               <div>
                 <h2 className="text-lg font-bold">{group.org}</h2>
-                <p className="text-sm text-muted-foreground">{group.name}</p>
+                <p className="text-sm text-muted-foreground">{copy.organizationNames[group.org] || group.name}</p>
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {group.items.map((item, ii) => (
                 <Card key={ii} className="hover:shadow-md transition-all group">
                   <CardContent className="p-5">
-                    <h3 className="font-semibold mb-3 group-hover:text-primary transition-colors">{item.title}</h3>
+                    <h3 className="font-semibold mb-3 group-hover:text-primary transition-colors">{lang === 'ar' && item.title_ar ? item.title_ar : item.title}</h3>
                     <div className="flex flex-wrap gap-1.5 mb-4">
-                      {item.tags.map(tag => (
+                      {(lang === 'ar' && item.tags_ar ? item.tags_ar : item.tags).map(tag => (
                         <Badge key={tag} variant="secondary" className="text-xs rounded-full">{tag}</Badge>
                       ))}
                     </div>
@@ -97,7 +119,7 @@ export default function Guidelines() {
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1.5 text-sm text-primary font-medium hover:underline"
                     >
-                      <ExternalLink className="w-3.5 h-3.5" /> View Guideline
+                      <ExternalLink className="w-3.5 h-3.5" /> {copy.viewGuideline}
                     </a>
                   </CardContent>
                 </Card>
