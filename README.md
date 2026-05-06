@@ -31,7 +31,12 @@ The knowledge base and citations still work locally. For production, you need a 
 
 This repo can be deployed to GitHub Pages as a static frontend.
 
-What the workflow does:
+Two deployment options are now possible:
+
+1. GitHub Actions Pages workflow
+2. Classic `gh-pages` branch deployment with the `gh-pages` package
+
+What the Pages build does:
 
 - builds the app with a hash-based router for SPA navigation on Pages
 - uses relative asset paths
@@ -49,6 +54,28 @@ Files involved:
 - `vite.config.js`
 - `src/App.jsx`
 - `src/components/layout/AppLayout.jsx`
+
+### Deploy with `gh-pages`
+
+1. Run `npm install`
+2. Commit and push your code
+3. Run:
+   - `npm run deploy`
+4. In GitHub, open `Settings -> Pages`
+5. Set the source to the `gh-pages` branch
+
+This publish flow uses:
+
+- `npm run build:gh-pages`
+- `npm run deploy`
+
+The `build:gh-pages` script forces:
+
+- `VITE_ROUTER_MODE=hash`
+- `VITE_PUBLIC_BASE_PATH=./`
+- `VITE_DISABLE_MEDICAL_ASSISTANT=true`
+
+### Deploy with GitHub Actions
 
 How to enable deployment:
 
