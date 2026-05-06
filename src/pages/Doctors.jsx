@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/lib/LanguageContext';
 import { useQuery } from '@tanstack/react-query';
 import { listArticles } from '@/lib/local-data';
@@ -172,9 +172,8 @@ export default function Doctors() {
   const copy = PAGE_COPY[lang] || PAGE_COPY.en;
   const [search, setSearch] = useState('');
   const [selectedDoctor, setSelectedDoctor] = useState(null);
-
-  const params = new URLSearchParams(window.location.search);
-  const authorParam = params.get('author');
+  const [searchParams] = useSearchParams();
+  const authorParam = searchParams.get('author');
 
   const { data: articles = [], isLoading } = useQuery({
     queryKey: ['articles-doctors'],

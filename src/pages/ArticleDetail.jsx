@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { useLanguage } from '@/lib/LanguageContext';
 import { useQuery } from '@tanstack/react-query';
 import { getArticle, listArticles } from '@/lib/local-data';
@@ -12,8 +12,7 @@ import ReactMarkdown from 'react-markdown';
 
 export default function ArticleDetail() {
   const { t, lang } = useLanguage();
-  const urlParts = window.location.pathname.split('/');
-  const articleId = urlParts[urlParts.length - 1];
+  const { id: articleId } = useParams();
 
   const { data: article, isLoading } = useQuery({
     queryKey: ['article', articleId],

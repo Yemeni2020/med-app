@@ -3,6 +3,7 @@ import { useLanguage } from '@/lib/LanguageContext';
 import { useQuery } from '@tanstack/react-query';
 import { listArticles } from '@/lib/local-data';
 import ArticleCard from '@/components/shared/ArticleCard';
+import { useSearchParams } from 'react-router-dom';
 import { Search, X } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -25,9 +26,8 @@ export default function Articles() {
   const { t, lang } = useLanguage();
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
-
-  const params = new URLSearchParams(window.location.search);
-  const urlCategory = params.get('category');
+  const [searchParams] = useSearchParams();
+  const urlCategory = searchParams.get('category');
 
   const { data: articles = [], isLoading } = useQuery({
     queryKey: ['articles'],
