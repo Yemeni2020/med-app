@@ -53,6 +53,7 @@ export default function AppLayout() {
   const assistantEnabled = import.meta.env.VITE_DISABLE_MEDICAL_ASSISTANT !== 'true';
 
   useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     setPageLoading(true);
 
     if (timeoutRef.current) {

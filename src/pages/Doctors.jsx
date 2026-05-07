@@ -52,7 +52,7 @@ const PAGE_COPY = {
 };
 
 function DoctorCard({ doctor, articles, onSelect }) {
-  const { t } = useLanguage();
+  const { t, isRTL } = useLanguage();
   return (
     <div
       className="bg-card border border-border rounded-2xl p-6 hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer group"
@@ -76,14 +76,14 @@ function DoctorCard({ doctor, articles, onSelect }) {
             </span>
           </div>
         </div>
-        <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0 mt-1" />
+        <ChevronRight className={`w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0 mt-1 ${isRTL ? 'rotate-180' : ''}`} />
       </div>
     </div>
   );
 }
 
 function DoctorProfile({ doctor, articles, onBack }) {
-  const { t, lang } = useLanguage();
+  const { t, lang, isRTL } = useLanguage();
   const copy = PAGE_COPY[lang] || PAGE_COPY.en;
   const totalViews = articles.reduce((sum, a) => sum + (a.views_count || 0), 0);
   const totalLikes = articles.reduce((sum, a) => sum + (a.likes_count || 0), 0);
@@ -91,7 +91,8 @@ function DoctorProfile({ doctor, articles, onBack }) {
   return (
     <div>
       <button onClick={onBack} className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors text-sm font-medium">
-        <ArrowLeft className="w-4 h-4" /> {t.doctors.backToAll}
+        <ArrowLeft className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
+        {t.doctors.backToAll}
       </button>
 
       {/* Profile Header */}

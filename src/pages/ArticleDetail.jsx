@@ -11,7 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import ReactMarkdown from 'react-markdown';
 
 export default function ArticleDetail() {
-  const { t, lang } = useLanguage();
+  const { t, lang, isRTL } = useLanguage();
   const { id: articleId } = useParams();
 
   const { data: article, isLoading } = useQuery({
@@ -56,7 +56,12 @@ export default function ArticleDetail() {
     return (
       <div className="max-w-4xl mx-auto px-4 py-20 text-center">
         <p className="text-muted-foreground">{t.common.noResults}</p>
-        <Link to="/articles"><Button variant="ghost" className="mt-4"><ArrowLeft className="w-4 h-4 mr-2" />{t.common.back}</Button></Link>
+        <Link to="/articles">
+          <Button variant="ghost" className="mt-4 gap-2">
+            <ArrowLeft className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
+            {t.common.back}
+          </Button>
+        </Link>
       </div>
     );
   }
@@ -68,7 +73,8 @@ export default function ArticleDetail() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
       <Link to="/articles">
         <Button variant="ghost" className="mb-8 gap-2 text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="w-4 h-4" /> {t.common.back}
+          <ArrowLeft className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
+          {t.common.back}
         </Button>
       </Link>
 
@@ -224,7 +230,19 @@ export default function ArticleDetail() {
               })}
             </div>
             <Link to="/articles">
-              <Button variant="ghost" size="sm" className="w-full mt-4 text-primary">{t.articleDetail.viewAllArticles} →</Button>
+              <Button variant="ghost" size="sm" className="w-full mt-4 text-primary gap-2">
+                {isRTL ? (
+                  <>
+                    <ArrowLeft className="w-4 h-4" />
+                    {t.articleDetail.viewAllArticles}
+                  </>
+                ) : (
+                  <>
+                    {t.articleDetail.viewAllArticles}
+                    <ArrowLeft className="w-4 h-4 rotate-180" />
+                  </>
+                )}
+              </Button>
             </Link>
           </div>
 

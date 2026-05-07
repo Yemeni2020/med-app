@@ -6,7 +6,7 @@ import { ArrowRight, Shield, Users, BookOpen } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function HeroSection() {
-  const { t } = useLanguage();
+  const { t, isRTL } = useLanguage();
 
   return (
     <section className="relative overflow-hidden">
@@ -37,8 +37,17 @@ export default function HeroSection() {
           <div className="flex flex-wrap gap-3 sm:gap-4">
             <Link to="/articles">
               <Button size="lg" className="rounded-full px-6 sm:px-8 gap-2 text-sm sm:text-base h-11 sm:h-12">
-                {t.hero.cta}
-                <ArrowRight className="w-4 h-4" />
+                {isRTL ? (
+                  <>
+                    <ArrowRight className="w-4 h-4 rotate-180" />
+                    {t.hero.cta}
+                  </>
+                ) : (
+                  <>
+                    {t.hero.cta}
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
               </Button>
             </Link>
             <Link to="/health-tools">

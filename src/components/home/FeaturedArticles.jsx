@@ -9,7 +9,7 @@ import { ArrowRight } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function FeaturedArticles() {
-  const { t } = useLanguage();
+  const { t, isRTL } = useLanguage();
 
   const { data: articles = [], isLoading } = useQuery({
     queryKey: ['featured-articles'],
@@ -38,7 +38,17 @@ export default function FeaturedArticles() {
         <h2 className="text-2xl md:text-3xl font-serif font-bold">{t.common.featured}</h2>
         <Link to="/articles">
           <Button variant="ghost" className="gap-2">
-            {t.common.viewAll} <ArrowRight className="w-4 h-4" />
+            {isRTL ? (
+              <>
+                <ArrowRight className="w-4 h-4 rotate-180" />
+                {t.common.viewAll}
+              </>
+            ) : (
+              <>
+                {t.common.viewAll}
+                <ArrowRight className="w-4 h-4" />
+              </>
+            )}
           </Button>
         </Link>
       </div>

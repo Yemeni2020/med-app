@@ -43,7 +43,7 @@ const featuredDoctors = [
 ];
 
 export default function DoctorsSpotlight() {
-  const { t } = useLanguage();
+  const { t, isRTL } = useLanguage();
   const localizedDoctors = featuredDoctors.map((doctor) => ({
     ...doctor,
     badge: doctor.badge === 'Featured Expert'
@@ -65,7 +65,17 @@ export default function DoctorsSpotlight() {
           </div>
           <Link to="/doctors">
             <Button variant="outline" className="rounded-full gap-2 shrink-0">
-              {t.home.doctors.viewAll} <ArrowRight className="w-4 h-4" />
+              {isRTL ? (
+                <>
+                  <ArrowRight className="w-4 h-4 rotate-180" />
+                  {t.home.doctors.viewAll}
+                </>
+              ) : (
+                <>
+                  {t.home.doctors.viewAll}
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
             </Button>
           </Link>
         </div>
@@ -116,7 +126,19 @@ export default function DoctorsSpotlight() {
                     <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                       <BookOpen className="w-3.5 h-3.5" /> {doc.articles} {t.home.doctors.articles}
                     </span>
-                    <span className="text-xs text-primary font-medium group-hover:underline">{t.home.doctors.viewProfile} →</span>
+                    <span className="flex items-center gap-1 text-xs text-primary font-medium group-hover:underline">
+                      {isRTL ? (
+                        <>
+                          <ArrowRight className="w-3.5 h-3.5 rotate-180" />
+                          {t.home.doctors.viewProfile}
+                        </>
+                      ) : (
+                        <>
+                          {t.home.doctors.viewProfile}
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </>
+                      )}
+                    </span>
                   </div>
                 </div>
               </Link>

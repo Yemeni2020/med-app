@@ -9,7 +9,7 @@ import BookmarkButton from '@/components/shared/BookmarkButton';
 import { useLanguage } from '@/lib/LanguageContext';
 
 export default function SavedArticles() {
-  const { t } = useLanguage();
+  const { t, isRTL } = useLanguage();
   const { savedItems, loading } = useSavedArticles();
   const typeLabel = t.savedPage.itemTypes;
 
@@ -18,7 +18,8 @@ export default function SavedArticles() {
       <div className="flex items-center gap-4 mb-2">
         <Link to="/">
           <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground">
-            <ArrowLeft className="w-4 h-4" /> {t.common.back}
+            <ArrowLeft className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
+            {t.common.back}
           </Button>
         </Link>
       </div>

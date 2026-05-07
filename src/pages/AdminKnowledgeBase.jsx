@@ -87,7 +87,7 @@ const initialForm = {
 };
 
 export default function AdminKnowledgeBase() {
-  const { lang } = useLanguage();
+  const { lang, isRTL } = useLanguage();
   const copy = PAGE_COPY[lang] || PAGE_COPY.en;
   const queryClient = useQueryClient();
   const fileInputRef = useRef(null);
@@ -166,7 +166,8 @@ export default function AdminKnowledgeBase() {
       <div className="flex items-center gap-4 mb-6">
         <Link to="/dashboard">
           <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground">
-            <ArrowLeft className="w-4 h-4" /> {copy.back}
+            <ArrowLeft className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
+            {copy.back}
           </Button>
         </Link>
       </div>
