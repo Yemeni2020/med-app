@@ -81,6 +81,7 @@ export default function AppLayout() {
       <Footer />
       <BottomNavbar />
       {assistantEnabled ? <MedicalAssistant /> : null}
+      
     </div>
   );
 }
