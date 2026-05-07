@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { createHealthMetric } from '@/lib/local-store';
+import { createHealthMetric } from '@/lib/med-api';
 import { useLanguage } from '@/lib/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { X, Loader2 } from 'lucide-react';
@@ -31,7 +31,7 @@ export default function AddMetricModal({ onClose, onSaved }) {
     e.preventDefault();
     if (!value || !date) return;
     setLoading(true);
-    createHealthMetric({
+    await createHealthMetric({
       metric_type: metricType,
       value: parseFloat(value),
       unit: selected?.unit || '',

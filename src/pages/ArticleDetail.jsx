@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useLanguage } from '@/lib/LanguageContext';
 import { useQuery } from '@tanstack/react-query';
-import { getArticle, listArticles } from '@/lib/local-data';
+import { getArticle, listArticles } from '@/lib/med-api';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Clock, Eye, Shield, Heart, Share2, User } from 'lucide-react';

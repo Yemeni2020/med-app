@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { analyzeSymptoms } from '@/lib/local-data';
+import { analyzeSymptoms } from '@/lib/med-api';
 import { useLanguage } from '@/lib/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -48,7 +48,7 @@ export default function SymptomChecker() {
     if (symptoms.length === 0) return;
     setLoading(true);
     setResult(null);
-    const data = analyzeSymptoms(symptoms, lang);
+    const data = await analyzeSymptoms(symptoms, lang);
     setResult(data);
     setLoading(false);
   };

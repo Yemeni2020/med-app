@@ -1,57 +1,36 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, BookOpen, Star } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/lib/LanguageContext';
+import { listDoctors } from '@/lib/med-api';
 
-const featuredDoctors = [
-  {
-    name: 'Dr. Sarah Mitchell',
-    title: 'MD, PhD',
-    specialty: 'Oncology',
-    bio: 'Leading researcher in immunotherapy and personalized cancer treatments at Harvard Medical School with over 15 years of clinical experience.',
-    avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=300&h=300&fit=crop&crop=face',
-    articles: 12,
-    badge: 'Featured Expert',
-    color: 'from-purple-500/10 to-purple-500/5',
-    badgeColor: 'bg-purple-100 text-purple-700',
-  },
-  {
-    name: 'Dr. James Thompson',
-    title: 'MD, FACC',
-    specialty: 'Cardiology',
-    bio: 'Board-certified cardiologist specializing in interventional procedures and heart failure management. Former Chief of Cardiology at Johns Hopkins.',
-    avatar: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=300&h=300&fit=crop&crop=face',
-    articles: 9,
-    badge: 'Top Contributor',
-    color: 'from-red-500/10 to-red-500/5',
-    badgeColor: 'bg-red-100 text-red-700',
-  },
-  {
-    name: 'Dr. Aisha Rahman',
-    title: 'MD, PhD',
-    specialty: 'Neurology',
-    bio: 'Neurologist and neuroscientist exploring cutting-edge stroke rehabilitation techniques and neuroplasticity at Stanford Neuroscience Institute.',
-    avatar: 'https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=300&h=300&fit=crop&crop=face',
-    articles: 8,
-    badge: 'Research Lead',
-    color: 'from-blue-500/10 to-blue-500/5',
-    badgeColor: 'bg-blue-100 text-blue-700',
-  },
+const accentSets = [
+  { color: 'from-purple-500/10 to-purple-500/5', badgeColor: 'bg-purple-100 text-purple-700' },
+  { color: 'from-red-500/10 to-red-500/5', badgeColor: 'bg-red-100 text-red-700' },
+  { color: 'from-blue-500/10 to-blue-500/5', badgeColor: 'bg-blue-100 text-blue-700' },
 ];
 
 export default function DoctorsSpotlight() {
   const { t, isRTL } = useLanguage();
-  const localizedDoctors = featuredDoctors.map((doctor) => ({
+  const { data: doctors = [] } = useQuery({
+    queryKey: ['home-doctors'],
+    queryFn: listDoctors,
+  });
+
+  const localizedDoctors = doctors.slice(0, 3).map((doctor, index) => ({
     ...doctor,
-    badge: doctor.badge === 'Featured Expert'
-      ? t.home.doctors.featuredExpert
-      : doctor.badge === 'Top Contributor'
-        ? t.home.doctors.topContributor
-        : t.home.doctors.researchLead,
+    avatar: doctor.author_avatar,
+    articles: doctor.articles_count || 0,
+    badge: index === 0 ? t.home.doctors.featuredExpert : index === 1 ? t.home.doctors.topContributor : t.home.doctors.researchLead,
+    color: accentSets[index % accentSets.length].color,
+    badgeColor: accentSets[index % accentSets.length].badgeColor,
   }));
+
+  if (!localizedDoctors.length) return null;
 
   return (
     <section className="py-16 md:py-20 bg-muted/30">
@@ -116,7 +95,7 @@ export default function DoctorsSpotlight() {
                   </div>
 
                   {/* Specialty */}
-                  <Badge variant="secondary" className="rounded-full text-xs mb-4">{doc.specialty}</Badge>
+                  <Badge variant="secondary" className="rounded-full text-xs mb-4">{t.categories[doc.specialty] || doc.specialty}</Badge>
 
                   {/* Bio */}
                   <p className="text-sm text-muted-foreground leading-relaxed mb-5 line-clamp-3">{doc.bio}</p>

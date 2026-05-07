@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { listSavedItems, removeSavedItem, saveItem } from '@/lib/local-store';
+import { listSavedItems, removeSavedItem, saveItem } from '@/lib/med-api';
 
 const SavedArticlesContext = createContext(null);
 
@@ -8,7 +8,7 @@ export function SavedArticlesProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   const fetchSaved = useCallback(async () => {
-    setSavedItems(listSavedItems());
+    setSavedItems(await listSavedItems());
     setLoading(false);
   }, []);
 
@@ -22,10 +22,10 @@ export function SavedArticlesProvider({ children }) {
   const toggleSave = useCallback(async (item) => {
     const existing = savedItems.find(s => s.item_id === item.item_id);
     if (existing) {
-      removeSavedItem(item.item_id);
+      await removeSavedItem(item.item_id);
       setSavedItems(prev => prev.filter(s => s.item_id !== item.item_id));
     } else {
-      const created = saveItem(item);
+      const created = await saveItem(item);
       setSavedItems(prev => [...prev, created]);
     }
   }, [savedItems]);

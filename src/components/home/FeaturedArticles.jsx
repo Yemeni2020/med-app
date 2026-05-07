@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/lib/LanguageContext';
 import { useQuery } from '@tanstack/react-query';
-import { listArticles } from '@/lib/local-data';
+import { listArticles } from '@/lib/med-api';
 import ArticleCard from '@/components/shared/ArticleCard';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';

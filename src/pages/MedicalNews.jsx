@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/lib/LanguageContext';
 import { useQuery } from '@tanstack/react-query';
-import { listNewsItems } from '@/lib/local-data';
+import { listMedicalNews } from '@/lib/med-api';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ExternalLink, Zap, Clock, Newspaper } from 'lucide-react';
@@ -24,7 +24,7 @@ export default function MedicalNews() {
 
   const { data: dbNews = [], isLoading } = useQuery({
     queryKey: ['medical-news'],
-    queryFn: listNewsItems,
+    queryFn: listMedicalNews,
   });
 
   const staticNews = [

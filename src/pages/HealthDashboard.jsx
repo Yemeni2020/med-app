@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { deleteHealthMetric, listHealthMetrics } from '@/lib/local-store';
+import { deleteHealthMetric, listHealthMetrics } from '@/lib/med-api';
 import { useSavedArticles } from '@/lib/SavedArticlesContext';
 import MetricChart from '@/components/dashboard/MetricChart';
 import AddMetricModal from '@/components/dashboard/AddMetricModal';

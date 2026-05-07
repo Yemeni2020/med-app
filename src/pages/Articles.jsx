@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useLanguage } from '@/lib/LanguageContext';
 import { useQuery } from '@tanstack/react-query';
-import { listArticles } from '@/lib/local-data';
+import { listArticles } from '@/lib/med-api';
 import ArticleCard from '@/components/shared/ArticleCard';
 import { useSearchParams } from 'react-router-dom';
 import { Search, X } from 'lucide-react';

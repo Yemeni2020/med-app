@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/lib/LanguageContext';
 import { useQuery } from '@tanstack/react-query';
-import { listArticles } from '@/lib/local-data';
+import { listArticles, listDoctors } from '@/lib/med-api';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Clock, Eye, Search, ArrowLeft, BookOpen, ChevronRight } from 'lucide-react';
@@ -176,8 +176,12 @@ export default function Doctors() {
   const [searchParams] = useSearchParams();
   const authorParam = searchParams.get('author');
 
-  const { data: articles = [], isLoading } = useQuery({
-    queryKey: ['articles-doctors'],
+  const { data: doctors = [], isLoading } = useQuery({
+    queryKey: ['doctors'],
+    queryFn: listDoctors,
+  });
+  const { data: articles = [] } = useQuery({
+    queryKey: ['doctor-articles'],
     queryFn: () => listArticles(100),
   });
 
@@ -216,34 +220,28 @@ export default function Doctors() {
   };
 
   // Group articles by author
-  const doctors = useMemo(() => {
-    const map = {};
-    articles.forEach(a => {
-      if (!a.author_name) return;
-      if (!map[a.author_name]) {
-        const extra = doctorBios[a.author_name] || {};
-        map[a.author_name] = {
-          name: a.author_name,
-          title: a.author_title,
-          specialty: a.category,
-          author_avatar: extra.avatar || a.author_avatar,
-          bio: extra.bio || null,
-          institution: extra.institution || null,
-        };
-      }
-    });
-    return Object.values(map);
-  }, [articles, copy]);
+  const mappedDoctors = useMemo(() => doctors.map((doctor) => {
+    const extra = doctorBios[doctor.name] || {};
+    return {
+      ...doctor,
+      title: doctor.title || null,
+      specialty: doctor.specialty,
+      author_avatar: extra.avatar || doctor.author_avatar,
+      bio: extra.bio || doctor.bio || null,
+      institution: extra.institution || doctor.institution || null,
+      articles_count: doctor.articles_count || 0,
+    };
+  }), [doctors, copy]);
 
   // Auto-select from URL param
   useEffect(() => {
-    if (authorParam && doctors.length > 0) {
-      const found = doctors.find(d => d.name === decodeURIComponent(authorParam));
+    if (authorParam && mappedDoctors.length > 0) {
+      const found = mappedDoctors.find(d => d.name === decodeURIComponent(authorParam));
       if (found) setSelectedDoctor(found);
     }
-  }, [authorParam, doctors]);
+  }, [authorParam, mappedDoctors]);
 
-  const filteredDoctors = doctors.filter(d => {
+  const filteredDoctors = mappedDoctors.filter(d => {
     const query = search.toLowerCase();
     return !search
       || d.name.toLowerCase().includes(query)

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/lib/LanguageContext';
-import { saveNewsletterSubscription } from '@/lib/local-store';
+import { saveNewsletterSubscription } from '@/lib/med-api';
 import { Stethoscope, Mail, Send } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';

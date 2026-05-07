@@ -129,6 +129,15 @@ const INITIAL_INTAKE = {
   chronicConditions: '',
 };
 
+function ensureClientId() {
+  if (typeof window === 'undefined') return 'server-render';
+  const existing = window.localStorage.getItem('med-app-client-id');
+  if (existing) return existing;
+  const created = window.crypto?.randomUUID?.() || `client-${Date.now()}`;
+  window.localStorage.setItem('med-app-client-id', created);
+  return created;
+}
+
 const URGENCY_META = {
   emergency: {
     icon: ShieldAlert,
@@ -578,79 +587,35 @@ export default function MedicalAssistant() {
         reveal();
       };
 
-      const response = await fetch('/api/medical-assistant', {
+      const response = await fetch('/api/med/medical-assistant', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Client-Id': ensureClientId(),
+        },
         body: JSON.stringify({
           lang,
           message: userText,
           history,
           intake: activeIntake,
-          stream: true,
         }),
       });
 
-      if (!response.ok || !response.body) {
+      if (!response.ok) {
         const payload = await response.json().catch(() => ({}));
         throw new Error(payload?.error || copy.unavailable);
       }
 
       setAssistantOnline(true);
       const minimumDelayPromise = revealAfterDelay();
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-        const chunks = buffer.split('\n\n');
-        buffer = chunks.pop() || '';
-
-        for (const chunk of chunks) {
-          const eventLine = chunk.split('\n').find((line) => line.startsWith('event:'));
-          const dataLine = chunk.split('\n').find((line) => line.startsWith('data:'));
-          if (!eventLine || !dataLine) continue;
-
-          const event = eventLine.replace('event:', '').trim();
-          const data = JSON.parse(dataLine.replace('data:', '').trim());
-
-          if (event === 'delta') {
-            bufferedText += data.token || '';
-            if (revealed) {
-              setMessages((current) => current.map((message) => (
-                message.id === assistantId
-                  ? { ...message, text: bufferedText }
-                  : message
-              )));
-            }
-          }
-
-          if (event === 'done') {
-            finalPayload = {
-              responseId: data.responseId || '',
-              citations: Array.isArray(data.citations) ? data.citations : [],
-              assessment: data.assessment || null,
-              answer: data.answer || '',
-            };
-            if (revealed) {
-              setMessages((current) => current.map((message) => (
-                message.id === assistantId
-                  ? {
-                      ...message,
-                      text: bufferedText || data.answer || '',
-                      citations: finalPayload.citations,
-                      assessment: finalPayload.assessment,
-                      responseId: finalPayload.responseId,
-                    }
-                  : message
-              )));
-            }
-          }
-        }
-      }
+      const data = await response.json();
+      bufferedText = data.answer || '';
+      finalPayload = {
+        responseId: data.responseId || '',
+        citations: Array.isArray(data.citations) ? data.citations : [],
+        assessment: data.assessment || null,
+        answer: data.answer || '',
+      };
 
       await minimumDelayPromise;
       setMessages((current) => current.map((message) => (

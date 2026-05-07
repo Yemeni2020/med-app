@@ -1,7 +1,7 @@
 import React from 'react';
 import { useLanguage } from '@/lib/LanguageContext';
 import { useQuery } from '@tanstack/react-query';
-import { listQASessions } from '@/lib/local-data';
+import { listQASessions } from '@/lib/med-api';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

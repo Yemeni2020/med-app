@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/lib/LanguageContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { listPatientStories } from '@/lib/local-data';
-import { createPatientStory, listSubmittedStories } from '@/lib/local-store';
+import { createPatientStory, listPatientStories } from '@/lib/med-api';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -23,7 +22,7 @@ export default function PatientStories() {
 
   const { data: dbStories = [], isLoading } = useQuery({
     queryKey: ['patient-stories'],
-    queryFn: () => [...listSubmittedStories(), ...listPatientStories()],
+    queryFn: listPatientStories,
   });
 
   const staticStories = [

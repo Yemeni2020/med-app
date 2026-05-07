@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/lib/LanguageContext';
-import { saveNewsletterSubscription } from '@/lib/local-store';
+import { saveNewsletterSubscription } from '@/lib/med-api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Mail, CheckCircle, Sparkles } from 'lucide-react';
