@@ -1,9 +1,10 @@
 import React, { useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, FileUp, LibraryBig, ShieldCheck, Trash2, Upload } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Clock3, FileUp, LibraryBig, MessageSquareQuote, ShieldCheck, ShieldX, Trash2, Upload } from 'lucide-react';
 import { listMedicalKnowledgeSources, saveMedicalKnowledgeSource, deleteMedicalKnowledgeSource, importMedicalKnowledgeSources } from '@/lib/medical-knowledge-api';
-import { normalizeSource } from '@/lib/medicalKnowledgeBase';
+import { getSourceFreshness, normalizeSource } from '@/lib/medicalKnowledgeBase';
+import { getMedicalAssistantAnalytics } from '@/lib/medical-assistant-api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -28,6 +29,13 @@ const PAGE_COPY = {
     category: 'Category',
     evidenceLevel: 'Evidence level',
     tags: 'Tags',
+    specialty: 'Specialty',
+    reviewStatus: 'Review status',
+    reviewOwner: 'Reviewer',
+    reviewedAt: 'Reviewed at',
+    expiresAt: 'Review expires',
+    sourcePublishedAt: 'Published at',
+    reviewNotes: 'Review notes',
     summary: 'Summary',
     content: 'Source content',
     tagsPlaceholder: 'comma, separated, tags',
@@ -41,6 +49,12 @@ const PAGE_COPY = {
     totalSources: 'Total sources',
     customSources: 'Custom sources',
     indexedChunks: 'Indexed chunks',
+    approvedSources: 'Approved custom sources',
+    staleSources: 'Stale custom sources',
+    feedbackTitle: 'Assistant feedback',
+    interactions: 'Logged interactions',
+    positiveFeedback: 'Positive feedback',
+    negativeFeedback: 'Negative feedback',
     importSuccess: 'Knowledge sources imported.',
     saveSuccess: 'Knowledge source saved.',
     deleteSuccess: 'Knowledge source deleted.',
@@ -61,6 +75,13 @@ const PAGE_COPY = {
     category: 'التصنيف',
     evidenceLevel: 'مستوى الدليل',
     tags: 'الوسوم',
+    specialty: 'التخصص',
+    reviewStatus: 'حالة المراجعة',
+    reviewOwner: 'المراجع',
+    reviewedAt: 'تاريخ المراجعة',
+    expiresAt: 'انتهاء المراجعة',
+    sourcePublishedAt: 'تاريخ النشر',
+    reviewNotes: 'ملاحظات المراجعة',
     summary: 'الملخص',
     content: 'محتوى المصدر',
     tagsPlaceholder: 'وسوم، مفصولة، بفواصل',
@@ -74,6 +95,12 @@ const PAGE_COPY = {
     totalSources: 'إجمالي المصادر',
     customSources: 'المصادر المخصصة',
     indexedChunks: 'الأجزاء المفهرسة',
+    approvedSources: 'المصادر المخصصة المعتمدة',
+    staleSources: 'المصادر المخصصة القديمة',
+    feedbackTitle: 'تقييمات المساعد',
+    interactions: 'المحادثات المسجلة',
+    positiveFeedback: 'التقييمات الإيجابية',
+    negativeFeedback: 'التقييمات السلبية',
     importSuccess: 'تم استيراد المصادر المعرفية.',
     saveSuccess: 'تم حفظ المصدر المعرفي.',
     deleteSuccess: 'تم حذف المصدر المعرفي.',
@@ -88,8 +115,15 @@ const initialForm = {
   organization: '',
   url: '',
   category: 'general-medicine',
+  specialty: 'general-medicine',
   evidenceLevel: 'reference',
   tags: '',
+  reviewStatus: 'draft',
+  reviewOwner: '',
+  reviewedAt: '',
+  expiresAt: '',
+  sourcePublishedAt: '',
+  reviewNotes: '',
   summary: '',
   content: '',
 };
@@ -104,6 +138,10 @@ export default function AdminKnowledgeBase() {
   const { data: knowledgeData } = useQuery({
     queryKey: ['medical-knowledge-sources'],
     queryFn: listMedicalKnowledgeSources,
+  });
+  const { data: assistantAnalytics } = useQuery({
+    queryKey: ['medical-assistant-analytics'],
+    queryFn: getMedicalAssistantAnalytics,
   });
   const sources = knowledgeData?.sources || [];
   const stats = knowledgeData?.stats || {};
@@ -136,6 +174,8 @@ export default function AdminKnowledgeBase() {
   const updateForm = (key, value) => {
     setForm((current) => ({ ...current, [key]: value }));
   };
+
+  const analyticsTotals = assistantAnalytics?.totals || {};
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -214,7 +254,7 @@ export default function AdminKnowledgeBase() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
         <Card className="rounded-2xl">
           <CardHeader className="pb-3">
             <CardDescription>{copy.retrievalStats}</CardDescription>
@@ -240,6 +280,56 @@ export default function AdminKnowledgeBase() {
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold text-primary">{stats.chunkCount || 0}</p>
+          </CardContent>
+        </Card>
+        <Card className="rounded-2xl">
+          <CardHeader className="pb-3">
+            <CardDescription>{copy.retrievalStats}</CardDescription>
+            <CardTitle>{copy.approvedSources}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold text-emerald-600">{stats.approvedCustomSourceCount || 0}</p>
+          </CardContent>
+        </Card>
+        <Card className="rounded-2xl">
+          <CardHeader className="pb-3">
+            <CardDescription>{copy.retrievalStats}</CardDescription>
+            <CardTitle>{copy.staleSources}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold text-amber-600">{stats.staleCustomSourceCount || 0}</p>
+          </CardContent>
+        </Card>
+        <Card className="rounded-2xl">
+          <CardHeader className="pb-3">
+            <CardDescription>{copy.feedbackTitle}</CardDescription>
+            <CardTitle>{copy.interactions}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold text-primary">{analyticsTotals.interactions || 0}</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        <Card className="rounded-2xl">
+          <CardHeader>
+            <CardTitle>{copy.feedbackTitle}</CardTitle>
+            <CardDescription>{copy.positiveFeedback}</CardDescription>
+          </CardHeader>
+          <CardContent className="flex items-center gap-3">
+            <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+            <p className="text-2xl font-bold text-foreground">{analyticsTotals.positive || 0}</p>
+          </CardContent>
+        </Card>
+        <Card className="rounded-2xl">
+          <CardHeader>
+            <CardTitle>{copy.feedbackTitle}</CardTitle>
+            <CardDescription>{copy.negativeFeedback}</CardDescription>
+          </CardHeader>
+          <CardContent className="flex items-center gap-3">
+            <ShieldX className="w-5 h-5 text-red-600" />
+            <p className="text-2xl font-bold text-foreground">{analyticsTotals.negative || 0}</p>
           </CardContent>
         </Card>
       </div>
@@ -274,7 +364,11 @@ export default function AdminKnowledgeBase() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label>{copy.specialty}</Label>
+                  <Input value={form.specialty} onChange={(e) => updateForm('specialty', e.target.value)} />
+                </div>
                 <div className="space-y-2">
                   <Label>{copy.evidenceLevel}</Label>
                   <Input value={form.evidenceLevel} onChange={(e) => updateForm('evidenceLevel', e.target.value)} />
@@ -285,9 +379,40 @@ export default function AdminKnowledgeBase() {
                 </div>
               </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label>{copy.reviewStatus}</Label>
+                  <Input value={form.reviewStatus} onChange={(e) => updateForm('reviewStatus', e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>{copy.reviewOwner}</Label>
+                  <Input value={form.reviewOwner} onChange={(e) => updateForm('reviewOwner', e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>{copy.reviewedAt}</Label>
+                  <Input type="date" value={form.reviewedAt} onChange={(e) => updateForm('reviewedAt', e.target.value)} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>{copy.expiresAt}</Label>
+                  <Input type="date" value={form.expiresAt} onChange={(e) => updateForm('expiresAt', e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>{copy.sourcePublishedAt}</Label>
+                  <Input type="date" value={form.sourcePublishedAt} onChange={(e) => updateForm('sourcePublishedAt', e.target.value)} />
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <Label>{copy.summary}</Label>
                 <Textarea value={form.summary} placeholder={copy.summaryPlaceholder} onChange={(e) => updateForm('summary', e.target.value)} className="min-h-[92px]" />
+              </div>
+
+              <div className="space-y-2">
+                <Label>{copy.reviewNotes}</Label>
+                <Textarea value={form.reviewNotes} onChange={(e) => updateForm('reviewNotes', e.target.value)} className="min-h-[92px]" />
               </div>
 
               <div className="space-y-2">
@@ -311,7 +436,10 @@ export default function AdminKnowledgeBase() {
             {sources.length === 0 ? (
               <p className="text-sm text-muted-foreground">{copy.none}</p>
             ) : (
-              sources.map((source, index) => (
+              sources.map((source, index) => {
+                const freshness = getSourceFreshness(source);
+
+                return (
                 <div key={source.id} className="space-y-3">
                   {index > 0 && <Separator />}
                   <div className="flex items-start justify-between gap-3">
@@ -320,10 +448,17 @@ export default function AdminKnowledgeBase() {
                         <Badge variant="outline" className="rounded-full">{source.organization}</Badge>
                         <Badge variant="secondary" className="rounded-full">{source.evidenceLevel}</Badge>
                         <Badge variant="secondary" className="rounded-full">{source.category}</Badge>
+                        <Badge variant={source.reviewStatus === 'approved' ? 'default' : 'outline'} className="rounded-full">{source.reviewStatus}</Badge>
+                        <Badge variant="outline" className="rounded-full">{freshness.label}</Badge>
                       </div>
                       <div>
                         <p className="font-semibold">{source.title}</p>
                         <p className="text-sm text-muted-foreground line-clamp-3">{source.summary}</p>
+                      </div>
+                      <div className="grid grid-cols-1 gap-1 text-xs text-muted-foreground">
+                        <p>{copy.specialty}: {source.specialty}</p>
+                        {source.reviewOwner ? <p>{copy.reviewOwner}: {source.reviewOwner}</p> : null}
+                        {source.reviewNotes ? <p>{copy.reviewNotes}: {source.reviewNotes}</p> : null}
                       </div>
                       {source.tags?.length > 0 && (
                         <div className="flex flex-wrap gap-2">
@@ -345,11 +480,45 @@ export default function AdminKnowledgeBase() {
                     </Button>
                   </div>
                 </div>
-              ))
+              )})
             )}
           </CardContent>
         </Card>
       </div>
+
+      <Card className="rounded-2xl mt-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <MessageSquareQuote className="w-5 h-5 text-primary" />
+            {copy.feedbackTitle}
+          </CardTitle>
+          <CardDescription>{assistantAnalytics?.updatedAt || ''}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {(assistantAnalytics?.recent || []).length === 0 ? (
+            <p className="text-sm text-muted-foreground">{copy.none}</p>
+          ) : (
+            assistantAnalytics.recent.slice(0, 8).map((entry, index) => (
+              <div key={entry.id} className="space-y-3">
+                {index > 0 && <Separator />}
+                <div className="flex items-start justify-between gap-4">
+                  <div className="space-y-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground line-clamp-2">{entry.request?.message}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {entry.response?.assessment?.urgency || 'unknown'} · {entry.response?.assessment?.specialty || 'general'}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0 text-xs">
+                    {entry.feedback?.rating === 'up' ? <CheckCircle2 className="w-4 h-4 text-emerald-600" /> : null}
+                    {entry.feedback?.rating === 'down' ? <ShieldX className="w-4 h-4 text-red-600" /> : null}
+                    {!entry.feedback?.rating ? <Clock3 className="w-4 h-4 text-muted-foreground" /> : null}
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

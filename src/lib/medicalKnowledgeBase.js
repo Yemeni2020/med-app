@@ -23,6 +23,10 @@ export const specialtyTopicPacks = {
     label: 'Respiratory medicine',
     keywords: ['cough', 'breathing', 'asthma', 'wheeze', 'pneumonia', 'oxygen'],
   },
+  sleepMedicine: {
+    label: 'Sleep medicine',
+    keywords: ['sleep', 'insomnia', 'can t sleep', 'cannot sleep', 'poor sleep', 'snoring', 'daytime sleepiness'],
+  },
   neurology: {
     label: 'Neurology',
     keywords: ['stroke', 'weakness', 'headache', 'seizure', 'vision loss', 'numbness'],
@@ -70,6 +74,11 @@ const SPECIALTY_KEYWORDS = {
     'cough', 'breath', 'breathing', 'shortness of breath', 'asthma', 'wheeze', 'oxygen', 'phlegm',
     'chest infection', 'lung', 'سعال', 'تنفس', 'ضيق التنفس', 'صدر', 'بلغم', 'ربو',
   ],
+  sleepMedicine: [
+    'sleep', 'sleeping', 'insomnia', 'can t sleep', 'cannot sleep', 'poor sleep', 'sleep quality', 'snoring',
+    'waking often', 'daytime sleepiness', 'sleep apnea', 'نوم', 'أرق', 'لا أستطيع النوم', 'ما اقدر انام',
+    'مشاكل النوم', 'جودة النوم', 'شخير', 'نعاس', 'انقطاع النفس اثناء النوم',
+  ],
   neurology: [
     'stroke', 'headache', 'migraine', 'weakness', 'numbness', 'seizure', 'dizziness', 'vision loss',
     'speech', 'face droop', 'جلطة', 'صداع', 'دوخة', 'ضعف', 'خدر', 'تشنج', 'رؤية',
@@ -107,7 +116,8 @@ const SPECIALTY_KEYWORDS = {
 const INTENT_KEYWORDS = {
   symptoms: [
     'symptom', 'symptoms', 'feel', 'pain', 'hurts', 'causes', 'why', 'what does it mean',
-    'rash', 'fever', 'cough', 'أعراض', 'ألم', 'سبب', 'ماذا يعني', 'أشعر', 'حمى', 'سعال',
+    'rash', 'fever', 'cough', 'sleep', 'insomnia', 'can t sleep', 'cannot sleep',
+    'أعراض', 'ألم', 'سبب', 'ماذا يعني', 'أشعر', 'حمى', 'سعال', 'نوم', 'أرق', 'لا أستطيع النوم',
   ],
   medications: [
     'medicine', 'medication', 'drug', 'dose', 'dosing', 'tablet', 'pill', 'capsule',
@@ -118,8 +128,8 @@ const INTENT_KEYWORDS = {
     'seek care', 'go to hospital', 'now or later', 'هل هو خطير', 'هل أذهب', 'متى أراجع', 'طوارئ', 'مستشفى', 'عاجل',
   ],
   prevention: [
-    'prevent', 'avoid', 'reduce risk', 'lifestyle', 'monitor', 'screening',
-    'وقاية', 'منع', 'تقليل الخطر', 'نمط الحياة', 'متابعة',
+    'prevent', 'avoid', 'reduce risk', 'lifestyle', 'monitor', 'screening', 'improve sleep', 'sleep hygiene',
+    'وقاية', 'منع', 'تقليل الخطر', 'نمط الحياة', 'متابعة', 'تحسين النوم',
   ],
 };
 
@@ -130,6 +140,32 @@ const VULNERABLE_GROUP_KEYWORDS = {
 };
 
 export const defaultMedicalSources = [
+  {
+    id: 'aasm-insomnia-basics',
+    title: 'Insomnia Basics and Sleep Hygiene',
+    organization: 'American Academy of Sleep Medicine',
+    url: 'https://aasm.org',
+    category: 'sleep-medicine',
+    specialty: 'sleepMedicine',
+    topicPack: 'sleepMedicine',
+    evidenceLevel: 'clinical-reference',
+    tags: ['sleep', 'insomnia', 'sleep hygiene', 'difficulty sleeping', 'sleep quality'],
+    summary: 'Difficulty falling asleep or staying asleep is often related to stress, inconsistent sleep schedule, caffeine, naps, pain, anxiety, depression, or other medical conditions. Basic sleep hygiene can help, but persistent insomnia deserves clinical review.',
+    content: 'Insomnia may include trouble falling asleep, waking often, or waking too early and not returning to sleep. Helpful measures include a regular sleep-wake schedule, limiting caffeine late in the day, reducing screen use near bedtime, and keeping the sleep environment dark and quiet. Medical review is appropriate when insomnia lasts for weeks, causes major daytime impairment, or occurs with loud snoring, breathing pauses, chest pain, severe anxiety, or depression.',
+  },
+  {
+    id: 'nhlbi-sleep-deprivation-effects',
+    title: 'Poor Sleep and Daytime Function',
+    organization: 'National Heart, Lung, and Blood Institute',
+    url: 'https://www.nhlbi.nih.gov',
+    category: 'sleep-medicine',
+    specialty: 'sleepMedicine',
+    topicPack: 'sleepMedicine',
+    evidenceLevel: 'patient-education',
+    tags: ['sleep deprivation', 'sleep quality', 'fatigue', 'sleep schedule', 'daytime sleepiness'],
+    summary: 'Poor sleep can affect concentration, mood, blood pressure, appetite, and daytime safety. Persistent poor sleep should not be dismissed when it affects normal function.',
+    content: 'Short-term poor sleep may happen with stress or temporary schedule disruption, but persistent sleep problems can impair concentration, mood, work performance, and safety. Sleep problems deserve review when they are frequent, worsening, or linked with loud snoring, breathing pauses, leg discomfort, depression, or significant daytime sleepiness.',
+  },
   {
     id: 'who-emergency-warning-signs',
     title: 'Emergency Warning Signs and When to Seek Immediate Care',
@@ -575,6 +611,15 @@ export function normalizeSource(rawSource, isDefault = false) {
         .map((tag) => tag.trim())
         .filter(Boolean);
 
+  const reviewStatus = String(
+    rawSource.reviewStatus || (isDefault ? 'approved' : 'draft'),
+  ).trim().toLowerCase();
+  const reviewedAt = String(rawSource.reviewedAt || '').trim();
+  const reviewOwner = String(rawSource.reviewOwner || '').trim();
+  const reviewNotes = String(rawSource.reviewNotes || '').trim();
+  const expiresAt = String(rawSource.expiresAt || '').trim();
+  const sourcePublishedAt = String(rawSource.sourcePublishedAt || '').trim();
+
   return {
     id: String(rawSource.id || slugifySourceId(`${organization}-${title}`)),
     title,
@@ -587,7 +632,54 @@ export function normalizeSource(rawSource, isDefault = false) {
     tags,
     summary,
     content,
+    reviewStatus,
+    reviewedAt,
+    reviewOwner,
+    reviewNotes,
+    expiresAt,
+    sourcePublishedAt,
     isDefault,
+  };
+}
+
+export function getSourceFreshness(source, now = new Date()) {
+  const expiresAt = source?.expiresAt ? new Date(source.expiresAt) : null;
+  const reviewedAt = source?.reviewedAt ? new Date(source.reviewedAt) : null;
+  const compareDate = expiresAt && !Number.isNaN(expiresAt.getTime())
+    ? expiresAt
+    : reviewedAt && !Number.isNaN(reviewedAt.getTime())
+      ? new Date(reviewedAt.getTime() + (180 * 24 * 60 * 60 * 1000))
+      : null;
+
+  if (!compareDate || Number.isNaN(compareDate.getTime())) {
+    return {
+      status: source?.isDefault ? 'current' : 'unknown',
+      label: source?.isDefault ? 'Current' : 'Unknown review date',
+      isStale: false,
+    };
+  }
+
+  const daysUntil = Math.ceil((compareDate.getTime() - now.getTime()) / (24 * 60 * 60 * 1000));
+  if (daysUntil < 0) {
+    return {
+      status: 'stale',
+      label: `Stale ${Math.abs(daysUntil)} day${Math.abs(daysUntil) === 1 ? '' : 's'} ago`,
+      isStale: true,
+    };
+  }
+
+  if (daysUntil <= 30) {
+    return {
+      status: 'expiring',
+      label: `Review soon (${daysUntil} day${daysUntil === 1 ? '' : 's'})`,
+      isStale: false,
+    };
+  }
+
+  return {
+    status: 'current',
+    label: `Current (${daysUntil} day${daysUntil === 1 ? '' : 's'} left)`,
+    isStale: false,
   };
 }
 
@@ -667,6 +759,16 @@ export function scoreSourceForQuery(source, query, profile = detectMedicalProfil
 
   const evidenceWeight = EVIDENCE_WEIGHTS[source.evidenceLevel] || 0;
   let score = evidenceWeight;
+  const freshness = getSourceFreshness(source);
+
+  if (!source.isDefault && source.reviewStatus !== 'approved') {
+    score -= 18;
+  }
+  if (freshness.status === 'stale') {
+    score -= 12;
+  } else if (freshness.status === 'expiring') {
+    score -= 4;
+  }
 
   for (const token of profile.tokens) {
     if (title.includes(token)) score += 10;
@@ -722,7 +824,7 @@ export function selectGroundingSources(sources, query, limit = 5) {
       source,
       score: scoreSourceForQuery(source, query, profile),
     }))
-    .filter((entry) => entry.score > 6)
+    .filter((entry) => entry.score > 6 && (entry.source.isDefault || entry.source.reviewStatus === 'approved'))
     .sort((left, right) => {
       if (right.score !== left.score) return right.score - left.score;
       return (EVIDENCE_WEIGHTS[right.source.evidenceLevel] || 0) - (EVIDENCE_WEIGHTS[left.source.evidenceLevel] || 0);
@@ -931,6 +1033,21 @@ function scoreChunkForQuery(chunk, query, profile, queryEmbedding) {
   return sourceScore + lexicalBoost + (similarity * 42);
 }
 
+function countChunkLexicalMatches(chunk, profile) {
+  const text = chunk.searchableText || '';
+  let matches = 0;
+
+  for (const token of profile.tokens) {
+    if (text.includes(token)) matches += 1;
+  }
+
+  for (const phrase of profile.bigrams) {
+    if (text.includes(phrase)) matches += 2;
+  }
+
+  return matches;
+}
+
 export function selectGroundingContextFromChunks(sources, chunks, query, options = {}) {
   const {
     sourceLimit = 4,
@@ -941,13 +1058,21 @@ export function selectGroundingContextFromChunks(sources, chunks, query, options
   const profile = detectMedicalProfile(query);
   const queryEmbedding = createLocalEmbedding(query);
   const sourceById = new Map(sources.map((source) => [source.id, source]));
+  const allowedSourceIds = new Set(
+    sources
+      .filter((source) => source.isDefault || source.reviewStatus === 'approved')
+      .map((source) => source.id),
+  );
 
   const scoredChunks = chunks
+    .filter((chunk) => allowedSourceIds.has(chunk.sourceId))
     .map((chunk) => ({
       chunk,
       score: scoreChunkForQuery(chunk, query, profile, queryEmbedding),
+      lexicalMatches: countChunkLexicalMatches(chunk, profile),
+      specialtyAligned: profile.specialties.includes(chunk.specialty) || profile.specialties.includes(chunk.topicPack),
     }))
-    .filter((entry) => entry.score > 8)
+    .filter((entry) => entry.score > 8 && (entry.lexicalMatches > 0 || entry.specialtyAligned))
     .sort((left, right) => right.score - left.score);
 
   const selectedChunks = [];

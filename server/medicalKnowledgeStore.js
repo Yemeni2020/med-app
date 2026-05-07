@@ -3,6 +3,7 @@ import path from 'node:path';
 import {
   buildKnowledgeChunks,
   defaultMedicalSources,
+  getSourceFreshness,
   mergeKnowledgeSources,
   normalizeSource,
 } from '../src/lib/medicalKnowledgeBase.js';
@@ -87,6 +88,9 @@ export function getPersistedMedicalKnowledgeSnapshot() {
     ...defaultChunks,
     ...store.customChunks.filter((chunk) => !defaultSourceIds.has(chunk.sourceId)),
   ];
+  const approvedCustomSources = store.customSources.filter((source) => source.reviewStatus === 'approved');
+  const staleCustomSources = store.customSources.filter((source) => getSourceFreshness(source).status === 'stale');
+  const expiringCustomSources = store.customSources.filter((source) => getSourceFreshness(source).status === 'expiring');
 
   return {
     version: store.version,
@@ -98,6 +102,10 @@ export function getPersistedMedicalKnowledgeSnapshot() {
     stats: {
       sourceCount: mergedSources.length,
       customSourceCount: store.customSources.length,
+      approvedCustomSourceCount: approvedCustomSources.length,
+      draftCustomSourceCount: store.customSources.length - approvedCustomSources.length,
+      staleCustomSourceCount: staleCustomSources.length,
+      expiringCustomSourceCount: expiringCustomSources.length,
       chunkCount: mergedChunks.length,
       defaultChunkCount: defaultChunks.length,
       customChunkCount: store.customChunks.length,

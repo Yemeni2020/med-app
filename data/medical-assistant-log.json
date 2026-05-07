@@ -1,0 +1,269 @@
+{
+  "version": 1,
+  "updatedAt": "2026-05-07T10:40:42.374Z",
+  "interactions": [
+    {
+      "id": "870c34c1-8342-4c97-b36a-fe91356c7be0",
+      "createdAt": "2026-05-07T10:40:42.373Z",
+      "request": {
+        "lang": "ar",
+        "message": "كيف أحسن جودة النوم؟",
+        "intake": null,
+        "history": [
+          {
+            "role": "assistant",
+            "content": "مرحبًا. أنا ميدبوت، المساعد الطبي في MedBlog.\n\nأشرح الأعراض والحالات الشائعة والأدوية ومتى يجب طلب الرعاية بالاعتماد على قاعدة المعرفة الطبية المعتمدة.\n\nمهم: أقدم معلومات صحية عامة فقط. لا أستبدل الطبيب المرخّص، ولا أقدّم تشخيصًا أو وصفًا دوائيًا."
+          },
+          {
+            "role": "user",
+            "content": "كيف أحسن جودة النوم؟"
+          }
+        ]
+      },
+      "response": {
+        "triage": "standard",
+        "grounded": true,
+        "refusal": false,
+        "model": "gemma3",
+        "citations": [
+          {
+            "id": "aasm-insomnia-basics",
+            "title": "Insomnia Basics and Sleep Hygiene",
+            "organization": "American Academy of Sleep Medicine",
+            "url": "https://aasm.org",
+            "category": "sleep-medicine",
+            "evidenceLevel": "clinical-reference",
+            "reviewStatus": "approved",
+            "reviewedAt": "",
+            "reviewOwner": "",
+            "sourcePublishedAt": "",
+            "freshnessStatus": "current",
+            "freshnessLabel": "Current",
+            "reasonSelected": "Insomnia may include trouble falling asleep, waking often, or waking too early and not returning to sleep. Helpful measures include a regular sleep-wake schedule, limiting caffeine late in the day, reducing screen use near bedtime, and keeping the sleep environment dark and quiet. Medical review is appropriate when insomnia lasts for weeks, causes major daytime impairment, or occurs with loud snoring, breathing pauses, chest pain, severe anxiety, or depression."
+          },
+          {
+            "id": "nhlbi-sleep-deprivation-effects",
+            "title": "Poor Sleep and Daytime Function",
+            "organization": "National Heart, Lung, and Blood Institute",
+            "url": "https://www.nhlbi.nih.gov",
+            "category": "sleep-medicine",
+            "evidenceLevel": "patient-education",
+            "reviewStatus": "approved",
+            "reviewedAt": "",
+            "reviewOwner": "",
+            "sourcePublishedAt": "",
+            "freshnessStatus": "current",
+            "freshnessLabel": "Current",
+            "reasonSelected": "Short-term poor sleep may happen with stress or temporary schedule disruption, but persistent sleep problems can impair concentration, mood, work performance, and safety. Sleep problems deserve review when they are frequent, worsening, or linked with loud snoring, breathing pauses, leg discomfort, depression, or significant daytime sleepiness."
+          }
+        ],
+        "assessment": {
+          "urgency": "routine",
+          "recommendedAction": "راقب الأعراض واطلب مراجعة طبية إذا استمرت أو ظهرت علامات إنذار.",
+          "needsFollowUpQuestion": true,
+          "followUpQuestion": "منذ متى بدأت هذه الأعراض، وهل تزداد سوءًا؟",
+          "reasoningBasis": [
+            "تم توجيه السؤال إلى مجال sleepMedicine.",
+            "الاستناد إلى American Academy of Sleep Medicine - Insomnia Basics and Sleep Hygiene.",
+            "الاستناد إلى National Heart, Lung, and Blood Institute - Poor Sleep and Daytime Function."
+          ],
+          "specialty": "sleepMedicine",
+          "intent": "symptoms",
+          "vulnerableGroups": []
+        }
+      }
+    },
+    {
+      "id": "b9c846f4-d1e0-4278-b9c2-6f5783df431b",
+      "createdAt": "2026-05-07T10:31:56.574Z",
+      "request": {
+        "lang": "ar",
+        "message": "لا استطيع النوم",
+        "intake": null,
+        "history": [
+          {
+            "role": "assistant",
+            "content": "مرحبًا. أنا ميدبوت، المساعد الطبي في MedBlog.\n\nأشرح الأعراض والحالات الشائعة والأدوية ومتى يجب طلب الرعاية بالاعتماد على قاعدة المعرفة الطبية المعتمدة.\n\nمهم: أقدم معلومات صحية عامة فقط. لا أستبدل الطبيب المرخّص، ولا أقدّم تشخيصًا أو وصفًا دوائيًا."
+          },
+          {
+            "role": "user",
+            "content": "كيف أحسن جودة النوم؟"
+          },
+          {
+            "role": "assistant",
+            "content": "أتعامل فقط مع الأسئلة الصحية والطبية. اطرح سؤالًا طبيًا وسأجيب من قاعدة المعرفة المعتمدة."
+          },
+          {
+            "role": "user",
+            "content": "لا استطيع النوم"
+          }
+        ]
+      },
+      "response": {
+        "triage": "refusal",
+        "grounded": false,
+        "refusal": true,
+        "model": null,
+        "citations": [],
+        "assessment": {
+          "urgency": "unsupported",
+          "recommendedAction": "اطرح سؤالًا صحيًا أو طبيًا وسأجيب من المصادر المعتمدة.",
+          "needsFollowUpQuestion": false,
+          "followUpQuestion": "",
+          "reasoningBasis": [],
+          "specialty": "general-medicine",
+          "intent": "general",
+          "vulnerableGroups": []
+        }
+      }
+    },
+    {
+      "id": "41025e94-b3af-42e6-a58d-1e32b0528d7c",
+      "createdAt": "2026-05-07T10:31:31.423Z",
+      "request": {
+        "lang": "ar",
+        "message": "كيف أحسن جودة النوم؟",
+        "intake": null,
+        "history": [
+          {
+            "role": "assistant",
+            "content": "مرحبًا. أنا ميدبوت، المساعد الطبي في MedBlog.\n\nأشرح الأعراض والحالات الشائعة والأدوية ومتى يجب طلب الرعاية بالاعتماد على قاعدة المعرفة الطبية المعتمدة.\n\nمهم: أقدم معلومات صحية عامة فقط. لا أستبدل الطبيب المرخّص، ولا أقدّم تشخيصًا أو وصفًا دوائيًا."
+          },
+          {
+            "role": "user",
+            "content": "كيف أحسن جودة النوم؟"
+          }
+        ]
+      },
+      "response": {
+        "triage": "refusal",
+        "grounded": false,
+        "refusal": true,
+        "model": null,
+        "citations": [],
+        "assessment": {
+          "urgency": "unsupported",
+          "recommendedAction": "اطرح سؤالًا صحيًا أو طبيًا وسأجيب من المصادر المعتمدة.",
+          "needsFollowUpQuestion": false,
+          "followUpQuestion": "",
+          "reasoningBasis": [],
+          "specialty": "general-medicine",
+          "intent": "general",
+          "vulnerableGroups": []
+        }
+      }
+    },
+    {
+      "id": "49777191-5888-44a0-a192-3241270d19e9",
+      "createdAt": "2026-05-07T10:31:08.414Z",
+      "request": {
+        "lang": "ar",
+        "message": "متى يجب طلب الرعاية بسبب ألم الصدر؟",
+        "intake": {
+          "ageGroup": "بالغ",
+          "duration": "من يوم إلى 3 أيام",
+          "severity": "خفيفة",
+          "fever": "no",
+          "pregnancy": "no",
+          "chronicConditions": "سكر"
+        },
+        "history": [
+          {
+            "role": "assistant",
+            "content": "مرحبًا. أنا ميدبوت، المساعد الطبي في MedBlog.\n\nأشرح الأعراض والحالات الشائعة والأدوية ومتى يجب طلب الرعاية بالاعتماد على قاعدة المعرفة الطبية المعتمدة.\n\nمهم: أقدم معلومات صحية عامة فقط. لا أستبدل الطبيب المرخّص، ولا أقدّم تشخيصًا أو وصفًا دوائيًا."
+          },
+          {
+            "role": "user",
+            "content": "متى يجب طلب الرعاية بسبب ألم الصدر؟"
+          }
+        ]
+      },
+      "response": {
+        "triage": "emergency",
+        "grounded": true,
+        "refusal": false,
+        "model": null,
+        "citations": [
+          {
+            "id": "aha-chest-pain-triage",
+            "title": "Chest Pain Triage and High-Risk Features",
+            "organization": "American Heart Association",
+            "url": "https://www.heart.org",
+            "category": "cardiovascular",
+            "evidenceLevel": "guideline",
+            "reviewStatus": "approved",
+            "reviewedAt": "",
+            "reviewOwner": "",
+            "sourcePublishedAt": "",
+            "freshnessStatus": "current",
+            "freshnessLabel": "Current",
+            "reasonSelected": "Chest discomfort may come from several causes, but pressure, heaviness, or squeezing associated with shortness of breath, sweating, nausea, collapse, or pain radiating to the arm, jaw, back, or shoulder should be treated as potentially cardiac until proven otherwise."
+          },
+          {
+            "id": "esc-heart-failure-worsening-signs",
+            "title": "Heart Failure Worsening Signs",
+            "organization": "European Society of Cardiology",
+            "url": "https://www.escardio.org",
+            "category": "cardiovascular",
+            "evidenceLevel": "clinical-reference",
+            "reviewStatus": "approved",
+            "reviewedAt": "",
+            "reviewOwner": "",
+            "sourcePublishedAt": "",
+            "freshnessStatus": "current",
+            "freshnessLabel": "Current",
+            "reasonSelected": "Fluid retention, new or worsening leg swelling, sudden weight gain over a short period, waking breathless at night, or needing extra pillows to breathe more comfortably can indicate worsening heart failure and should prompt clinical review. Severe breathing difficulty is an emergency."
+          },
+          {
+            "id": "nhlbi-hypertension-basics",
+            "title": "High Blood Pressure Basics and Follow-up",
+            "organization": "National Heart, Lung, and Blood Institute",
+            "url": "https://www.nhlbi.nih.gov",
+            "category": "cardiovascular",
+            "evidenceLevel": "clinical-reference",
+            "reviewStatus": "approved",
+            "reviewedAt": "",
+            "reviewOwner": "",
+            "sourcePublishedAt": "",
+            "freshnessStatus": "current",
+            "freshnessLabel": "Current",
+            "reasonSelected": "High blood pressure is commonly silent. Repeated elevated measurements should be confirmed using proper technique and clinician follow-up. Lifestyle measures such as lowering sodium intake, improving activity, weight management, sleep support, and medication when prescribed are core management strategies. Severe blood pressure elevation with neurologic symptoms, chest pain, or breathing difficulty needs urgent evaluation."
+          },
+          {
+            "id": "who-postpartum-emergency-features",
+            "title": "Postpartum Emergency Features",
+            "organization": "World Health Organization",
+            "url": "https://www.who.int",
+            "category": "womens-health",
+            "evidenceLevel": "guideline",
+            "reviewStatus": "approved",
+            "reviewedAt": "",
+            "reviewOwner": "",
+            "sourcePublishedAt": "",
+            "freshnessStatus": "current",
+            "freshnessLabel": "Current",
+            "reasonSelected": "After delivery, heavy bleeding, foul-smelling discharge, fever, severe headache, visual symptoms, chest pain, shortness of breath, or unilateral leg pain and swelling should prompt urgent medical assessment. Postpartum complications can escalate quickly."
+          }
+        ],
+        "assessment": {
+          "urgency": "emergency",
+          "recommendedAction": "اطلب رعاية طارئة فورًا أو توجّه إلى أقرب طوارئ.",
+          "needsFollowUpQuestion": false,
+          "followUpQuestion": "",
+          "reasoningBasis": [
+            "تم توجيه السؤال إلى مجال cardiology.",
+            "أُخذت شدة الأعراض في الاعتبار: خفيفة.",
+            "الاستناد إلى American Heart Association - Chest Pain Triage and High-Risk Features.",
+            "الاستناد إلى European Society of Cardiology - Heart Failure Worsening Signs.",
+            "الاستناد إلى National Heart, Lung, and Blood Institute - High Blood Pressure Basics and Follow-up."
+          ],
+          "specialty": "cardiology",
+          "intent": "symptoms",
+          "vulnerableGroups": [
+            "pregnancy"
+          ]
+        }
+      }
+    }
+  ]
+}
