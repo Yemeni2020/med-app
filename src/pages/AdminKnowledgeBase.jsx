@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, FileUp, LibraryBig, ShieldCheck, Trash2, Upload } from 'lucide-react';
-import { listMedicalKnowledgeSources, saveMedicalKnowledgeSource, deleteMedicalKnowledgeSource, importMedicalKnowledgeSources } from '@/lib/local-store';
+import { listMedicalKnowledgeSources, saveMedicalKnowledgeSource, deleteMedicalKnowledgeSource, importMedicalKnowledgeSources } from '@/lib/medical-knowledge-api';
 import { normalizeSource } from '@/lib/medicalKnowledgeBase';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -37,6 +37,10 @@ const PAGE_COPY = {
     storedSources: 'Custom sources',
     none: 'No custom sources yet.',
     delete: 'Delete',
+    retrievalStats: 'Retrieval stats',
+    totalSources: 'Total sources',
+    customSources: 'Custom sources',
+    indexedChunks: 'Indexed chunks',
     importSuccess: 'Knowledge sources imported.',
     saveSuccess: 'Knowledge source saved.',
     deleteSuccess: 'Knowledge source deleted.',
@@ -66,6 +70,10 @@ const PAGE_COPY = {
     storedSources: 'المصادر المخصصة',
     none: 'لا توجد مصادر مخصصة بعد.',
     delete: 'حذف',
+    retrievalStats: 'إحصاءات الاسترجاع',
+    totalSources: 'إجمالي المصادر',
+    customSources: 'المصادر المخصصة',
+    indexedChunks: 'الأجزاء المفهرسة',
     importSuccess: 'تم استيراد المصادر المعرفية.',
     saveSuccess: 'تم حفظ المصدر المعرفي.',
     deleteSuccess: 'تم حذف المصدر المعرفي.',
@@ -93,10 +101,12 @@ export default function AdminKnowledgeBase() {
   const fileInputRef = useRef(null);
   const [form, setForm] = useState(initialForm);
 
-  const { data: sources = [] } = useQuery({
+  const { data: knowledgeData } = useQuery({
     queryKey: ['medical-knowledge-sources'],
     queryFn: listMedicalKnowledgeSources,
   });
+  const sources = knowledgeData?.sources || [];
+  const stats = knowledgeData?.stats || {};
 
   const saveMutation = useMutation({
     mutationFn: saveMedicalKnowledgeSource,
@@ -202,6 +212,36 @@ export default function AdminKnowledgeBase() {
             <p className="text-xs">{copy.uploadHint}</p>
           </div>
         </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <Card className="rounded-2xl">
+          <CardHeader className="pb-3">
+            <CardDescription>{copy.retrievalStats}</CardDescription>
+            <CardTitle>{copy.totalSources}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold text-primary">{stats.sourceCount || 0}</p>
+          </CardContent>
+        </Card>
+        <Card className="rounded-2xl">
+          <CardHeader className="pb-3">
+            <CardDescription>{copy.retrievalStats}</CardDescription>
+            <CardTitle>{copy.customSources}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold text-primary">{stats.customSourceCount || 0}</p>
+          </CardContent>
+        </Card>
+        <Card className="rounded-2xl">
+          <CardHeader className="pb-3">
+            <CardDescription>{copy.retrievalStats}</CardDescription>
+            <CardTitle>{copy.indexedChunks}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold text-primary">{stats.chunkCount || 0}</p>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-[1.15fr_0.85fr] gap-6">

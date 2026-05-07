@@ -3,6 +3,7 @@ import { defineConfig, loadEnv } from 'vite'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { handleMedicalAssistantRequest } from './server/medicalAssistantRoute.js'
+import { handleMedicalKnowledgeRequest } from './server/medicalKnowledgeRoute.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -10,6 +11,9 @@ function medicalAssistantPlugin() {
   const attachRoute = (server) => {
     server.middlewares.use('/api/medical-assistant', (req, res) => {
       handleMedicalAssistantRequest(req, res);
+    });
+    server.middlewares.use('/api/medical-knowledge', (req, res) => {
+      handleMedicalKnowledgeRequest(req, res);
     });
   };
 

@@ -17,7 +17,6 @@ import {
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { useLanguage } from '@/lib/LanguageContext';
-import { listMedicalKnowledgeSources } from '@/lib/local-store';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const MIN_THINKING_MS = 5000;
@@ -264,7 +263,6 @@ export default function MedicalAssistant() {
           lang,
           message: userText,
           history,
-          customSources: listMedicalKnowledgeSources(),
           stream: true,
         }),
       });

@@ -1,4 +1,5 @@
-import { detectMedicalProfile, mergeKnowledgeSources, selectGroundingSources } from '../src/lib/medicalKnowledgeBase.js';
+import { detectMedicalProfile, selectGroundingContextFromChunks } from '../src/lib/medicalKnowledgeBase.js';
+import { getPersistedMedicalKnowledgeSnapshot } from './medicalKnowledgeStore.js';
 
 const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL || 'http://127.0.0.1:11434';
 const OLLAMA_GENERATE_URL = `${OLLAMA_BASE_URL.replace(/\/$/, '')}/api/generate`;
@@ -137,26 +138,25 @@ function buildAnswerTemplate(profile, lang) {
   }
 }
 
-function buildPrompt(history, message, lang, sources, profile) {
+function buildPrompt(history, message, lang, chunks, profile) {
   const transcript = history
     .slice(-8)
     .map((entry) => `${entry.role === 'assistant' ? 'Assistant' : 'User'}: ${entry.content}`)
     .join('\n');
 
   const answerLanguage = lang === 'ar' ? 'Arabic' : 'English';
-  const sourceContext = sources
-    .map(({ source }, index) => [
-      `Source ${index + 1}`,
-      `ID: ${source.id}`,
-      `Title: ${source.title}`,
-      `Organization: ${source.organization}`,
-      `Category: ${source.category}`,
-      `Specialty: ${source.specialty}`,
-      `Topic pack: ${source.topicPack}`,
-      `Evidence level: ${source.evidenceLevel}`,
-      `Summary: ${source.summary}`,
-      `Content: ${source.content}`,
-      source.url ? `URL: ${source.url}` : '',
+  const sourceContext = chunks
+    .map(({ chunk }, index) => [
+      `Chunk ${index + 1}`,
+      `Source ID: ${chunk.sourceId}`,
+      `Title: ${chunk.title}`,
+      `Organization: ${chunk.organization}`,
+      `Category: ${chunk.category}`,
+      `Specialty: ${chunk.specialty}`,
+      `Topic pack: ${chunk.topicPack}`,
+      `Evidence level: ${chunk.evidenceLevel}`,
+      `Chunk text: ${chunk.text}`,
+      chunk.url ? `URL: ${chunk.url}` : '',
     ].filter(Boolean).join('\n'))
     .join('\n\n');
 
@@ -239,16 +239,19 @@ export async function handleMedicalAssistantRequest(req, res) {
   const message = typeof payload?.message === 'string' ? payload.message.trim() : '';
   const lang = payload?.lang === 'ar' ? 'ar' : 'en';
   const history = Array.isArray(payload?.history) ? payload.history : [];
-  const customSources = Array.isArray(payload?.customSources) ? payload.customSources.slice(0, 50) : [];
   const stream = Boolean(payload?.stream);
 
   if (!message) {
     return sendJson(res, 400, { error: 'Message is required.' });
   }
 
-  const allSources = mergeKnowledgeSources(customSources);
-  const profile = detectMedicalProfile(message);
-  const selectedSources = selectGroundingSources(allSources, message, 5);
+  const snapshot = getPersistedMedicalKnowledgeSnapshot();
+  const { profile, selectedSources, selectedChunks } = selectGroundingContextFromChunks(
+    snapshot.sources,
+    snapshot.chunks,
+    message,
+    { sourceLimit: 4, chunkLimit: 8, maxChunksPerSource: 2 },
+  );
   const citations = selectedSources.map(({ source }) => ({
     id: source.id,
     title: source.title,
@@ -321,7 +324,7 @@ export async function handleMedicalAssistantRequest(req, res) {
     return;
   }
 
-  if (selectedSources.length === 0) {
+  if (selectedSources.length === 0 || selectedChunks.length === 0) {
     const payload = buildSimpleReply({
       lang,
       answer: lang === 'ar'
@@ -347,7 +350,7 @@ export async function handleMedicalAssistantRequest(req, res) {
       },
       body: JSON.stringify({
         model,
-        prompt: buildPrompt(history, message, lang, selectedSources, profile),
+        prompt: buildPrompt(history, message, lang, selectedChunks, profile),
         system: buildInstructions(lang),
         stream,
         options: {

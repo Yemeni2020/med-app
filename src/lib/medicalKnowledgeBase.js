@@ -8,6 +8,8 @@ const EVIDENCE_WEIGHTS = {
   reference: 2,
 };
 
+const EMBEDDING_DIMENSION = 384;
+
 export const specialtyTopicPacks = {
   emergency: {
     label: 'Emergency and urgent care',
@@ -296,6 +298,58 @@ export const defaultMedicalSources = [
     tags: ['thyroid', 'fatigue', 'weight change', 'palpitations', 'heat intolerance'],
     summary: 'Thyroid problems can cause fatigue, weight change, cold or heat intolerance, bowel changes, palpitations, and menstrual changes, but symptoms are not specific.',
     content: 'Thyroid-related symptoms often overlap with other conditions. Persistent unexplained weight change, new heat intolerance with palpitations, or cold intolerance with fatigue can justify clinician review and laboratory assessment rather than self-diagnosis.',
+  },
+  {
+    id: 'nice-fatigue-initial-assessment',
+    title: 'Persistent Fatigue Initial Assessment',
+    organization: 'National Institute for Health and Care Excellence',
+    url: 'https://www.nice.org.uk',
+    category: 'general-medicine',
+    specialty: 'general-medicine',
+    topicPack: 'general-medicine',
+    evidenceLevel: 'clinical-reference',
+    tags: ['fatigue', 'tired', 'weakness', 'sleep', 'persistent symptoms'],
+    summary: 'Persistent tiredness can reflect sleep problems, infection, anemia, thyroid disease, mood disorders, medication effects, or other medical conditions, especially when it is unexplained or prolonged.',
+    content: 'Fatigue is a common symptom and often has non-dangerous explanations such as poor sleep, stress, or a recent viral illness, but persistent fatigue deserves review when it is new, worsening, unexplained, or accompanied by weight loss, fever, breathlessness, dizziness, or reduced daily function.',
+  },
+  {
+    id: 'nih-anemia-symptom-overview',
+    title: 'Anemia Symptom Overview',
+    organization: 'National Institutes of Health',
+    url: 'https://www.nih.gov',
+    category: 'general-medicine',
+    specialty: 'general-medicine',
+    topicPack: 'general-medicine',
+    evidenceLevel: 'clinical-reference',
+    tags: ['anemia', 'tired', 'fatigue', 'cold intolerance', 'pale', 'dizziness'],
+    summary: 'Anemia can cause tiredness, weakness, feeling cold, pale skin, dizziness, shortness of breath on exertion, or palpitations.',
+    content: 'Low red blood cell levels or low hemoglobin can reduce oxygen delivery and lead to fatigue, weakness, cold intolerance, lightheadedness, pallor, palpitations, or shortness of breath with activity. Persistent symptoms should be medically evaluated rather than assumed to be simple tiredness.',
+  },
+  {
+    id: 'cdc-viral-illness-chills-fever',
+    title: 'Chills, Feeling Cold, and Viral Illness',
+    organization: 'Centers for Disease Control and Prevention',
+    url: 'https://www.cdc.gov',
+    category: 'general-medicine',
+    specialty: 'general-medicine',
+    topicPack: 'general-medicine',
+    evidenceLevel: 'public-health',
+    tags: ['feeling cold', 'chills', 'viral illness', 'infection', 'fever'],
+    summary: 'Feeling cold or having chills can happen with infection, especially when fever is developing, but ongoing symptoms should be judged alongside other signs such as fever, cough, pain, or weakness.',
+    content: 'Chills or feeling cold may happen when body temperature is rising during an infection, but they can also occur in cool environments or with other medical conditions. Fever, worsening cough, breathing symptoms, confusion, dehydration, or significant weakness should raise concern for a more important illness.',
+  },
+  {
+    id: 'who-hypothermia-warning-signs',
+    title: 'Hypothermia Warning Signs',
+    organization: 'World Health Organization',
+    url: 'https://www.who.int',
+    category: 'emergency-care',
+    specialty: 'emergency',
+    topicPack: 'emergency',
+    evidenceLevel: 'guideline',
+    tags: ['hypothermia', 'cold exposure', 'confusion', 'shivering', 'low body temperature'],
+    summary: 'Cold exposure with confusion, drowsiness, slowed speech, clumsiness, or reduced shivering can indicate hypothermia and needs urgent care.',
+    content: 'Feeling cold after environmental cold exposure becomes urgent when there is confusion, unusual sleepiness, slowed speech, poor coordination, blue skin, weak pulse, or low body temperature. These signs suggest hypothermia rather than ordinary cold discomfort and require prompt warming and urgent medical help.',
   },
   {
     id: 'nice-abdominal-pain-triage',
@@ -694,4 +748,243 @@ export function mergeKnowledgeSources(customSources = []) {
   }
 
   return merged;
+}
+
+function hashFeature(value, dimension = EMBEDDING_DIMENSION) {
+  let hash = 2166136261;
+  const input = String(value || '');
+
+  for (let index = 0; index < input.length; index += 1) {
+    hash ^= input.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+
+  return Math.abs(hash >>> 0) % dimension;
+}
+
+function buildFeatureWeights(text) {
+  const tokens = tokenize(text);
+  const bigrams = buildBigrams(tokens);
+  const weights = new Map();
+
+  for (const token of tokens) {
+    const bucket = hashFeature(`t:${token}`);
+    weights.set(bucket, (weights.get(bucket) || 0) + 1);
+  }
+
+  for (const bigram of bigrams) {
+    const bucket = hashFeature(`b:${bigram}`);
+    weights.set(bucket, (weights.get(bucket) || 0) + 1.6);
+  }
+
+  return weights;
+}
+
+export function createLocalEmbedding(text) {
+  const weights = buildFeatureWeights(text);
+  let norm = 0;
+
+  for (const value of weights.values()) {
+    norm += value * value;
+  }
+
+  norm = Math.sqrt(norm) || 1;
+
+  return Array.from(weights.entries())
+    .map(([index, value]) => [index, value / norm])
+    .sort((left, right) => left[0] - right[0]);
+}
+
+export function cosineSimilaritySparse(leftEmbedding = [], rightEmbedding = []) {
+  if (!leftEmbedding.length || !rightEmbedding.length) return 0;
+
+  let leftIndex = 0;
+  let rightIndex = 0;
+  let score = 0;
+
+  while (leftIndex < leftEmbedding.length && rightIndex < rightEmbedding.length) {
+    const [leftBucket, leftValue] = leftEmbedding[leftIndex];
+    const [rightBucket, rightValue] = rightEmbedding[rightIndex];
+
+    if (leftBucket === rightBucket) {
+      score += leftValue * rightValue;
+      leftIndex += 1;
+      rightIndex += 1;
+    } else if (leftBucket < rightBucket) {
+      leftIndex += 1;
+    } else {
+      rightIndex += 1;
+    }
+  }
+
+  return score;
+}
+
+function splitIntoChunks(text, maxLength = 900) {
+  const normalized = String(text || '').replace(/\r/g, '').trim();
+  if (!normalized) return [];
+
+  const paragraphs = normalized
+    .split(/\n{2,}/)
+    .map((paragraph) => paragraph.replace(/\s+/g, ' ').trim())
+    .filter(Boolean);
+
+  const chunks = [];
+
+  for (const paragraph of paragraphs) {
+    if (paragraph.length <= maxLength) {
+      chunks.push(paragraph);
+      continue;
+    }
+
+    const sentences = paragraph
+      .split(/(?<=[.!?؟])\s+/)
+      .map((sentence) => sentence.trim())
+      .filter(Boolean);
+
+    let current = '';
+
+    for (const sentence of sentences) {
+      if (!current) {
+        current = sentence;
+        continue;
+      }
+
+      if (`${current} ${sentence}`.length <= maxLength) {
+        current = `${current} ${sentence}`;
+      } else {
+        chunks.push(current);
+        current = sentence;
+      }
+    }
+
+    if (current) {
+      chunks.push(current);
+    }
+  }
+
+  return chunks;
+}
+
+export function buildSourceChunks(source) {
+  const normalized = normalizeSource(source, Boolean(source?.isDefault));
+  if (!normalized) return [];
+
+  const chunkTexts = [];
+  const seen = new Set();
+  const pushChunkText = (value) => {
+    const text = String(value || '').trim();
+    if (!text) return;
+    const key = normalizeText(text);
+    if (!key || seen.has(key)) return;
+    seen.add(key);
+    chunkTexts.push(text);
+  };
+
+  pushChunkText(normalized.summary);
+  splitIntoChunks(normalized.content).forEach(pushChunkText);
+
+  return chunkTexts.map((text, index) => {
+    const fullText = `${normalized.title}\n${normalized.summary}\n${text}`.trim();
+
+    return {
+      id: `${normalized.id}::chunk-${index + 1}`,
+      sourceId: normalized.id,
+      title: normalized.title,
+      organization: normalized.organization,
+      category: normalized.category,
+      specialty: normalized.specialty,
+      topicPack: normalized.topicPack,
+      evidenceLevel: normalized.evidenceLevel,
+      tags: normalized.tags,
+      url: normalized.url,
+      text,
+      embedding: createLocalEmbedding(fullText),
+      searchableText: normalizeText(`${normalized.title} ${normalized.organization} ${normalized.summary} ${text} ${normalized.tags.join(' ')}`),
+    };
+  });
+}
+
+export function buildKnowledgeChunks(sources = []) {
+  return sources.flatMap((source) => buildSourceChunks(source));
+}
+
+function scoreChunkForQuery(chunk, query, profile, queryEmbedding) {
+  const sourceScore = scoreSourceForQuery(chunk, query, profile);
+  const similarity = cosineSimilaritySparse(queryEmbedding, chunk.embedding);
+  const text = chunk.searchableText || '';
+  let lexicalBoost = 0;
+
+  for (const token of profile.tokens) {
+    if (text.includes(token)) lexicalBoost += 1.8;
+  }
+
+  for (const phrase of profile.bigrams) {
+    if (text.includes(phrase)) lexicalBoost += 2.4;
+  }
+
+  if (profile.primarySpecialty === chunk.specialty) lexicalBoost += 6;
+  if (profile.specialties.includes(chunk.topicPack)) lexicalBoost += 4;
+  if (profile.intents.includes('triage') && chunk.specialty === 'emergency') lexicalBoost += 5;
+  if (profile.intents.includes('medications') && chunk.specialty === 'medications') lexicalBoost += 5;
+
+  return sourceScore + lexicalBoost + (similarity * 42);
+}
+
+export function selectGroundingContextFromChunks(sources, chunks, query, options = {}) {
+  const {
+    sourceLimit = 4,
+    chunkLimit = 8,
+    maxChunksPerSource = 2,
+  } = options;
+
+  const profile = detectMedicalProfile(query);
+  const queryEmbedding = createLocalEmbedding(query);
+  const sourceById = new Map(sources.map((source) => [source.id, source]));
+
+  const scoredChunks = chunks
+    .map((chunk) => ({
+      chunk,
+      score: scoreChunkForQuery(chunk, query, profile, queryEmbedding),
+    }))
+    .filter((entry) => entry.score > 8)
+    .sort((left, right) => right.score - left.score);
+
+  const selectedChunks = [];
+  const sourceUseCount = new Map();
+
+  for (const entry of scoredChunks) {
+    if (selectedChunks.length >= chunkLimit) break;
+    const currentCount = sourceUseCount.get(entry.chunk.sourceId) || 0;
+    if (currentCount >= maxChunksPerSource) continue;
+    selectedChunks.push(entry);
+    sourceUseCount.set(entry.chunk.sourceId, currentCount + 1);
+  }
+
+  const selectedSources = [];
+  const seenSources = new Set();
+
+  for (const entry of selectedChunks) {
+    if (selectedSources.length >= sourceLimit) break;
+    if (seenSources.has(entry.chunk.sourceId)) continue;
+    const source = sourceById.get(entry.chunk.sourceId);
+    if (!source) continue;
+    selectedSources.push({
+      source,
+      score: entry.score,
+      matchedChunks: selectedChunks.filter((chunkEntry) => chunkEntry.chunk.sourceId === entry.chunk.sourceId),
+    });
+    seenSources.add(entry.chunk.sourceId);
+  }
+
+  return {
+    profile,
+    selectedChunks,
+    selectedSources,
+  };
+}
+
+export function selectGroundingContext(sources, query, options = {}) {
+  const chunks = buildKnowledgeChunks(sources);
+  return selectGroundingContextFromChunks(sources, chunks, query, options);
 }
