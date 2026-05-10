@@ -12,6 +12,7 @@ import { UserProfileProvider } from '@/lib/UserProfileContext';
 import { CookieConsentProvider } from '@/lib/CookieConsentContext';
 import AppLayout from '@/components/layout/AppLayout';
 import CookieConsentBanner from '@/components/layout/CookieConsentBanner';
+import ConsentTrackers from '@/components/layout/ConsentTrackers';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
 import Home from '@/pages/Home';
@@ -89,6 +90,7 @@ function App() {
                     <AuthenticatedApp />
                   </Router>
                 </SavedArticlesProvider>
+                <ConsentTrackers />
                 <CookieConsentBanner />
               </CookieConsentProvider>
             </LanguageProvider>
