@@ -58,11 +58,11 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16 gap-4">
 
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2.5 shrink-0">
+          <Link to="/" className="flex items-center gap-2 md:gap-2.5 shrink-0">
             <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center shadow-sm">
               <Stethoscope className="w-4 h-4 text-white" />
             </div>
-            <span className="text-lg font-extrabold tracking-tight text-foreground">
+            <span className="text-base md:text-lg font-extrabold tracking-tight text-foreground">
               Med<span className="text-primary">Blog</span>
             </span>
           </Link>
@@ -165,7 +165,7 @@ export default function Navbar() {
             <button
               onClick={toggleTheme}
               title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-              className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all"
+              className="hidden md:flex p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all"
             >
               <AnimatePresence mode="wait" initial={false}>
                 {isDark ? (
@@ -184,7 +184,7 @@ export default function Navbar() {
             <Link
               to="/dashboard"
               title={t.nav.dashboard}
-              className={`p-2 rounded-lg transition-all hover:bg-muted/60 ${isActive('/dashboard') ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground'}`}
+              className={`hidden md:flex p-2 rounded-lg transition-all hover:bg-muted/60 ${isActive('/dashboard') ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground'}`}
             >
               <LayoutDashboard className="w-4.5 h-4.5 w-[18px] h-[18px]" />
             </Link>
@@ -193,7 +193,7 @@ export default function Navbar() {
             <Link
               to="/saved"
               title={t.nav.saved}
-              className={`relative p-2 rounded-lg transition-all hover:bg-muted/60 ${isActive('/saved') ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground'}`}
+              className={`relative hidden md:flex p-2 rounded-lg transition-all hover:bg-muted/60 ${isActive('/saved') ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground'}`}
             >
               <Bookmark className={`w-[18px] h-[18px] ${isActive('/saved') ? 'fill-primary' : ''}`} />
               <AnimatePresence>
@@ -211,7 +211,7 @@ export default function Navbar() {
             {/* Language toggle */}
             <button
               onClick={toggleLang}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all border border-transparent hover:border-border"
+              className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all border border-transparent hover:border-border"
             >
               <Globe className="w-3.5 h-3.5" />
               {lang === 'en' ? 'عربي' : 'EN'}
@@ -234,6 +234,22 @@ export default function Navbar() {
                 </div>
 
                 <div className="flex flex-col gap-0.5 p-3 overflow-y-auto">
+                  <div className="flex items-center gap-2 px-2 pb-3">
+                    <button
+                      onClick={toggleTheme}
+                      className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-border px-3 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all"
+                    >
+                      {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                      {isDark ? 'Light Mode' : 'Dark Mode'}
+                    </button>
+                    <button
+                      onClick={toggleLang}
+                      className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-border px-3 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all"
+                    >
+                      <Globe className="w-4 h-4" />
+                      {lang === 'en' ? 'عربي' : 'EN'}
+                    </button>
+                  </div>
                   {allLinks.map(link => (
                     <Link
                       key={link.to}

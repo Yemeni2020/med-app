@@ -99,18 +99,34 @@ export async function login(credentials) {
   return payload;
 }
 
-export async function registerPatient({ name, email, password, passwordConfirmation }) {
+export async function registerPatient({
+  name,
+  fullNameAr = '',
+  email,
+  password,
+  passwordConfirmation,
+  phone = '',
+  dateOfBirth = '',
+  gender = '',
+  location = '',
+  bio = '',
+}) {
   const payload = await apiRequest('/register', {
     method: 'POST',
     body: JSON.stringify({
       name: {
         en: name,
-        ar: name,
+        ar: fullNameAr || name,
       },
       email,
       password,
       password_confirmation: passwordConfirmation,
       role: 'patient',
+      phone: phone || null,
+      date_of_birth: dateOfBirth || null,
+      gender: gender || null,
+      location: location || null,
+      bio: bio || null,
     }),
   });
 

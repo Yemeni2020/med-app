@@ -9,11 +9,13 @@ import {
   Lock,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useLanguage } from '@/lib/LanguageContext';
 import { requestPasswordReset, updateProfilePassword } from '@/lib/med-api';
 import { useUserProfile } from '@/lib/UserProfileContext';
 import { toast } from 'sonner';
 
 export default function PasswordManager() {
+  const { t } = useLanguage();
   const { profile } = useUserProfile();
   const [isOpen, setIsOpen] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
@@ -26,10 +28,10 @@ export default function PasswordManager() {
   const [error, setError] = useState('');
 
   const requirements = [
-    { label: 'At least 8 characters', met: newPassword.length >= 8 },
-    { label: 'Contains uppercase letter', met: /[A-Z]/.test(newPassword) },
-    { label: 'Contains lowercase letter', met: /[a-z]/.test(newPassword) },
-    { label: 'Contains a number', met: /\d/.test(newPassword) },
+    { label: t.profile.password.requirements.min, met: newPassword.length >= 8 },
+    { label: t.profile.password.requirements.upper, met: /[A-Z]/.test(newPassword) },
+    { label: t.profile.password.requirements.lower, met: /[a-z]/.test(newPassword) },
+    { label: t.profile.password.requirements.number, met: /\d/.test(newPassword) },
   ];
 
   const allMet = requirements.every((requirement) => requirement.met);
@@ -52,12 +54,12 @@ export default function PasswordManager() {
     setError('');
 
     if (!allMet) {
-      setError('Password does not meet all requirements.');
+      setError(t.profile.password.errors.requirements);
       return;
     }
 
     if (!passwordsMatch) {
-      setError('New passwords do not match.');
+      setError(t.profile.password.errors.mismatch);
       return;
     }
 
@@ -68,10 +70,10 @@ export default function PasswordManager() {
         password: newPassword,
         password_confirmation: confirmPassword,
       });
-      toast.success('Password changed successfully.');
+      toast.success(t.profile.password.success);
       handleClose();
     } catch (requestError) {
-      setError(requestError.message || 'Incorrect current password. Please try again.');
+      setError(requestError.message || t.profile.password.errors.incorrectCurrent);
     } finally {
       setLoading(false);
     }
@@ -79,16 +81,16 @@ export default function PasswordManager() {
 
   const handleForgot = async () => {
     if (!profile?.email) {
-      toast.error('No email address is available for this account.');
+      toast.error(t.profile.password.noEmail);
       return;
     }
 
     setLoading(true);
     try {
       await requestPasswordReset(profile.email);
-      toast.success('Password reset email sent. Check your inbox.');
+      toast.success(t.profile.password.resetSent);
     } catch (requestError) {
-      toast.error(requestError.message || 'Failed to send reset email. Please try again.');
+      toast.error(requestError.message || t.profile.password.resetFailed);
     } finally {
       setLoading(false);
     }
@@ -98,38 +100,38 @@ export default function PasswordManager() {
     <div className="bg-card border border-border rounded-2xl p-5">
       <div className="flex items-center justify-between mb-1">
         <h3 className="font-semibold flex items-center gap-2">
-          <KeyRound className="w-4 h-4 text-primary" /> Password & Security
+          <KeyRound className="w-4 h-4 text-primary" /> {t.profile.password.title}
         </h3>
         {!isOpen ? (
           <Button size="sm" variant="outline" onClick={() => setIsOpen(true)} className="rounded-xl gap-1.5">
-            <Lock className="w-3.5 h-3.5" /> Change Password
+            <Lock className="w-3.5 h-3.5" /> {t.profile.password.changePassword}
           </Button>
         ) : null}
       </div>
 
       {!isOpen ? (
         <div className="mt-3 space-y-2">
-          <p className="text-sm text-muted-foreground">Keep your account secure with a strong password.</p>
+          <p className="text-sm text-muted-foreground">{t.profile.password.keepSecure}</p>
           <button
             onClick={handleForgot}
             disabled={loading}
             className="text-xs text-primary hover:underline disabled:opacity-50 flex items-center gap-1"
           >
             {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
-            Forgot password? Send reset link
+            {t.profile.password.forgotPassword}
           </button>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="mt-4 space-y-4">
           <div>
-            <label className="text-xs font-medium text-muted-foreground block mb-1.5">Current Password</label>
+            <label className="text-xs font-medium text-muted-foreground block mb-1.5">{t.profile.password.currentPassword}</label>
             <div className="relative">
               <input
                 type={showCurrent ? 'text' : 'password'}
                 value={currentPassword}
                 onChange={(event) => setCurrentPassword(event.target.value)}
                 required
-                placeholder="Enter current password"
+                placeholder={t.profile.password.placeholders.currentPassword}
                 className="w-full h-10 px-4 pr-10 rounded-xl border border-input bg-muted/30 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               />
               <button
@@ -143,14 +145,14 @@ export default function PasswordManager() {
           </div>
 
           <div>
-            <label className="text-xs font-medium text-muted-foreground block mb-1.5">New Password</label>
+            <label className="text-xs font-medium text-muted-foreground block mb-1.5">{t.profile.password.newPassword}</label>
             <div className="relative">
               <input
                 type={showNew ? 'text' : 'password'}
                 value={newPassword}
                 onChange={(event) => setNewPassword(event.target.value)}
                 required
-                placeholder="Enter new password"
+                placeholder={t.profile.password.placeholders.newPassword}
                 className="w-full h-10 px-4 pr-10 rounded-xl border border-input bg-muted/30 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               />
               <button
@@ -177,14 +179,14 @@ export default function PasswordManager() {
           </div>
 
           <div>
-            <label className="text-xs font-medium text-muted-foreground block mb-1.5">Confirm New Password</label>
+            <label className="text-xs font-medium text-muted-foreground block mb-1.5">{t.profile.password.confirmNewPassword}</label>
             <div className="relative">
               <input
                 type={showConfirm ? 'text' : 'password'}
                 value={confirmPassword}
                 onChange={(event) => setConfirmPassword(event.target.value)}
                 required
-                placeholder="Re-enter new password"
+                placeholder={t.profile.password.placeholders.confirmNewPassword}
                 className={`w-full h-10 px-4 pr-10 rounded-xl border bg-muted/30 text-sm focus:outline-none focus:ring-2 focus:ring-ring ${
                   confirmPassword.length > 0 ? (passwordsMatch ? 'border-green-400' : 'border-red-400') : 'border-input'
                 }`}
@@ -199,7 +201,7 @@ export default function PasswordManager() {
             </div>
             {confirmPassword.length > 0 && !passwordsMatch ? (
               <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-                <AlertCircle className="w-3 h-3" /> Passwords do not match
+                <AlertCircle className="w-3 h-3" /> {t.profile.password.errors.mismatch}
               </p>
             ) : null}
           </div>
@@ -212,16 +214,16 @@ export default function PasswordManager() {
 
           <div className="flex gap-2 pt-1">
             <Button type="button" variant="outline" className="flex-1 rounded-xl" onClick={handleClose}>
-              Cancel
+              {t.profile.password.buttons.cancel}
             </Button>
             <Button type="submit" disabled={loading || !allMet || !passwordsMatch} className="flex-1 rounded-xl gap-2">
               {loading ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" /> Saving...
+                  <Loader2 className="w-4 h-4 animate-spin" /> {t.profile.password.buttons.saving}
                 </>
               ) : (
                 <>
-                  <Lock className="w-4 h-4" /> Update Password
+                  <Lock className="w-4 h-4" /> {t.profile.password.buttons.update}
                 </>
               )}
             </Button>
