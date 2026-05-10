@@ -9,7 +9,9 @@ import { LanguageProvider } from '@/lib/LanguageContext';
 import { SavedArticlesProvider } from '@/lib/SavedArticlesContext';
 import { ThemeProvider } from '@/lib/ThemeContext';
 import { UserProfileProvider } from '@/lib/UserProfileContext';
+import { CookieConsentProvider } from '@/lib/CookieConsentContext';
 import AppLayout from '@/components/layout/AppLayout';
+import CookieConsentBanner from '@/components/layout/CookieConsentBanner';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
 import Home from '@/pages/Home';
@@ -81,11 +83,14 @@ function App() {
         <ThemeProvider>
           <UserProfileProvider>
             <LanguageProvider>
-            <SavedArticlesProvider>
-            <Router>
-                <AuthenticatedApp />
-              </Router>
-              </SavedArticlesProvider>
+              <CookieConsentProvider>
+                <SavedArticlesProvider>
+                  <Router>
+                    <AuthenticatedApp />
+                  </Router>
+                </SavedArticlesProvider>
+                <CookieConsentBanner />
+              </CookieConsentProvider>
             </LanguageProvider>
           </UserProfileProvider>
           <Toaster />
