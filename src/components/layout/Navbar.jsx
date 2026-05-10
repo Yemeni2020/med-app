@@ -1,13 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useLanguage } from '@/lib/LanguageContext';
+import { useAuth } from '@/lib/AuthContext';
+import { useTheme } from '@/lib/ThemeContext';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, Globe, Stethoscope, Bookmark, LayoutDashboard, ChevronDown } from 'lucide-react';
+import { Menu, Globe, Stethoscope, Bookmark, LayoutDashboard, ChevronDown, LogIn, ShieldCheck, LogOut, Moon, Sun } from 'lucide-react';
 import { useSavedArticles } from '@/lib/SavedArticlesContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+import UserAvatar from '@/components/profile/UserAvatar';
 
 export default function Navbar() {
   const { lang, toggleLang, isRTL, t } = useLanguage();
+  const { isAuthenticated, user, logout } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
@@ -38,6 +45,12 @@ export default function Navbar() {
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
+
+  const handleLogout = async () => {
+    await logout();
+    toast.success(lang === 'ar' ? 'تم تسجيل الخروج.' : 'Signed out.');
+    setMobileOpen(false);
+  };
 
   return (
     <nav className="sticky top-0 z-50 bg-white/90 dark:bg-card/90 backdrop-blur-xl border-b border-border/60 shadow-sm">
@@ -118,6 +131,55 @@ export default function Navbar() {
 
           {/* Right actions */}
           <div className="flex items-center gap-1 shrink-0">
+            {isAuthenticated ? (
+              <>
+                <UserAvatar size="sm" linkTo="/profile" />
+
+                {user?.role === 'admin' ? (
+                  <Link
+                    to="/admin/knowledge-base"
+                    title="Knowledge Base"
+                    className={`p-2 rounded-lg transition-all hover:bg-muted/60 ${isActive('/admin/knowledge-base') ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground'}`}
+                  >
+                    <ShieldCheck className="w-[18px] h-[18px]" />
+                  </Link>
+                ) : null}
+
+                <button
+                  onClick={handleLogout}
+                  title="Sign Out"
+                  className="hidden md:flex p-2 rounded-lg transition-all hover:bg-muted/60 text-muted-foreground hover:text-foreground"
+                >
+                  <LogOut className="w-[18px] h-[18px]" />
+                </button>
+              </>
+            ) : (
+              <Link to="/login">
+                <Button variant="outline" size="sm" className="hidden md:inline-flex rounded-full">
+                  <LogIn className="w-4 h-4 mr-2" />
+                  Sign In
+                </Button>
+              </Link>
+            )}
+
+            <button
+              onClick={toggleTheme}
+              title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all"
+            >
+              <AnimatePresence mode="wait" initial={false}>
+                {isDark ? (
+                  <motion.div key="sun" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}>
+                    <Sun className="w-[18px] h-[18px]" />
+                  </motion.div>
+                ) : (
+                  <motion.div key="moon" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.2 }}>
+                    <Moon className="w-[18px] h-[18px]" />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </button>
+
             {/* Dashboard icon */}
             <Link
               to="/dashboard"
@@ -187,6 +249,25 @@ export default function Navbar() {
                     </Link>
                   ))}
                   <div className="border-t border-border my-2" />
+                  {isAuthenticated ? (
+                    <>
+                      <Link to="/profile" onClick={() => setMobileOpen(false)} className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive('/profile') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}>
+                        <UserAvatar size="sm" linkTo={null} /> {getDisplayName(user)}
+                      </Link>
+                      {user?.role === 'admin' ? (
+                        <Link to="/admin/knowledge-base" onClick={() => setMobileOpen(false)} className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive('/admin/knowledge-base') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}>
+                          <ShieldCheck className="w-4 h-4" /> Knowledge Base
+                        </Link>
+                      ) : null}
+                      <button onClick={handleLogout} className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium transition-all text-muted-foreground hover:text-foreground hover:bg-muted/50">
+                        <LogOut className="w-4 h-4" /> Sign Out
+                      </button>
+                    </>
+                  ) : (
+                    <Link to="/login" onClick={() => setMobileOpen(false)} className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive('/login') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}>
+                      <LogIn className="w-4 h-4" /> Sign In
+                    </Link>
+                  )}
                   <Link to="/dashboard" onClick={() => setMobileOpen(false)} className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive('/dashboard') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}>
                     <LayoutDashboard className="w-4 h-4" /> {t.nav.dashboard}
                   </Link>
@@ -202,4 +283,10 @@ export default function Navbar() {
       </div>
     </nav>
   );
+}
+
+function getDisplayName(user) {
+  if (!user?.name) return 'Profile';
+  if (typeof user.name === 'string') return user.name;
+  return user.name.en || user.name.ar || 'Profile';
 }

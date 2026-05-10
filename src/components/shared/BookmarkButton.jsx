@@ -1,11 +1,14 @@
 import React from 'react';
 import { Bookmark } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useSavedArticles } from '@/lib/SavedArticlesContext';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/lib/LanguageContext';
+import { ApiError } from '@/lib/med-api';
 
 export default function BookmarkButton({ item, className = '', size = 'default' }) {
+  const navigate = useNavigate();
   const { lang } = useLanguage();
   const { isSaved, toggleSave } = useSavedArticles();
   const saved = isSaved(item.item_id);
@@ -13,13 +16,24 @@ export default function BookmarkButton({ item, className = '', size = 'default' 
   const handleClick = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    await toggleSave(item);
-    toast(saved
-      ? (lang === 'ar' ? 'تمت إزالة العنصر من المحفوظات' : 'Removed from saved articles')
-      : (lang === 'ar' ? 'تمت إضافة العنصر إلى قائمة القراءة' : 'Saved to your reading list'), {
-      icon: saved ? '🗑️' : '🔖',
-      duration: 2500,
-    });
+
+    try {
+      await toggleSave(item);
+      toast(saved
+        ? (lang === 'ar' ? 'تمت إزالة العنصر من المحفوظات' : 'Removed from saved articles')
+        : (lang === 'ar' ? 'تمت إضافة العنصر إلى قائمة القراءة' : 'Saved to your reading list'), {
+        icon: saved ? '🗑️' : '🔖',
+        duration: 2500,
+      });
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 401) {
+        toast.error(lang === 'ar' ? 'سجّل الدخول لحفظ المقالات.' : 'Please sign in to save articles.');
+        navigate('/login');
+        return;
+      }
+
+      toast.error(error.message || 'Unable to update saved items.');
+    }
   };
 
   const sizeClasses = size === 'lg'

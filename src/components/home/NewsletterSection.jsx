@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/lib/LanguageContext';
+import { useAuth } from '@/lib/AuthContext';
 import { saveNewsletterSubscription } from '@/lib/med-api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,21 +10,34 @@ import { toast } from 'sonner';
 
 export default function NewsletterSection() {
   const { t, lang } = useLanguage();
+  const { appPublicSettings } = useAuth();
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
   const [loading, setLoading] = useState(false);
+  const newsletter = appPublicSettings?.newsletter || {};
+  const resolve = appPublicSettings?.resolve;
+  const badge = resolve ? resolve(newsletter.badge, lang, t.newsletter.badge) : t.newsletter.badge;
+  const title = resolve ? resolve(newsletter.title, lang, t.newsletter.title) : t.newsletter.title;
+  const subtitle = resolve ? resolve(newsletter.subtitle, lang, t.newsletter.subtitle) : t.newsletter.subtitle;
+  const placeholder = resolve ? resolve(newsletter.placeholder, lang, t.newsletter.placeholder) : t.newsletter.placeholder;
+  const cta = resolve ? resolve(newsletter.cta, lang, t.common.subscribe) : t.common.subscribe;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email) return;
     setLoading(true);
-    saveNewsletterSubscription({ email, language: lang });
-    setSubscribed(true);
-    setLoading(false);
-    toast.success(t.newsletter.success, {
-      description: t.newsletter.description,
-      duration: 4000,
-    });
+    try {
+      await saveNewsletterSubscription({ email, language: lang });
+      setSubscribed(true);
+      toast.success(t.newsletter.success, {
+        description: t.newsletter.description,
+        duration: 4000,
+      });
+    } catch (error) {
+      toast.error(error.message || 'Unable to subscribe right now.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -40,10 +54,10 @@ export default function NewsletterSection() {
         >
           <div className="inline-flex items-center gap-2 bg-white/20 text-white px-4 py-1.5 rounded-full text-sm font-medium mb-6">
             <Sparkles className="w-4 h-4" />
-            {t.newsletter.badge}
+            {badge}
           </div>
-          <h2 className="text-3xl md:text-4xl font-serif font-bold text-white mb-4">{t.newsletter.title}</h2>
-          <p className="text-white/80 text-lg mb-8">{t.newsletter.subtitle}</p>
+          <h2 className="text-3xl md:text-4xl font-serif font-bold text-white mb-4">{title}</h2>
+          <p className="text-white/80 text-lg mb-8">{subtitle}</p>
 
           {subscribed ? (
             <div className="flex items-center justify-center gap-3 text-white text-lg">
@@ -56,12 +70,12 @@ export default function NewsletterSection() {
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                placeholder={t.newsletter.placeholder}
+                placeholder={placeholder}
                 className="bg-white/20 border-white/30 text-white placeholder:text-white/60 h-12 rounded-xl"
               />
               <Button type="submit" disabled={loading} className="bg-white text-primary hover:bg-white/90 h-12 px-8 rounded-xl font-semibold">
                 <Mail className="w-4 h-4 mr-2" />
-                {t.common.subscribe}
+                {cta}
               </Button>
             </form>
           )}

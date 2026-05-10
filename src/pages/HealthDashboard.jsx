@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { deleteHealthMetric, listHealthMetrics } from '@/lib/med-api';
 import { useSavedArticles } from '@/lib/SavedArticlesContext';
+import { useAuth } from '@/lib/AuthContext';
 import MetricChart from '@/components/dashboard/MetricChart';
 import AddMetricModal from '@/components/dashboard/AddMetricModal';
 import TrendingTopics from '@/components/dashboard/TrendingTopics';
@@ -25,6 +26,7 @@ const METRIC_META = {
 
 export default function HealthDashboard() {
   const { t } = useLanguage();
+  const { user } = useAuth();
   const [showAddModal, setShowAddModal] = useState(false);
   const [activeMetric, setActiveMetric] = useState('weight');
   const { savedItems } = useSavedArticles();
@@ -170,11 +172,13 @@ export default function HealthDashboard() {
                   <TrendingUp className="w-4 h-4 text-primary" /> {t.dashboard.healthTools}
                 </Button>
               </Link>
-              <Link to="/admin/knowledge-base">
-                <Button variant="outline" size="sm" className="w-full justify-start gap-2 rounded-xl">
-                  <LibraryBig className="w-4 h-4 text-primary" /> Medical Knowledge Base
-                </Button>
-              </Link>
+              {user?.role === 'admin' ? (
+                <Link to="/admin/knowledge-base">
+                  <Button variant="outline" size="sm" className="w-full justify-start gap-2 rounded-xl">
+                    <LibraryBig className="w-4 h-4 text-primary" /> Medical Knowledge Base
+                  </Button>
+                </Link>
+              ) : null}
             </div>
           </div>
         </div>

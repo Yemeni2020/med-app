@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/lib/LanguageContext';
+import { useAuth } from '@/lib/AuthContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createPatientStory, listPatientStories } from '@/lib/med-api';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -13,9 +15,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Heart, Plus, Quote, User } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 
 export default function PatientStories() {
   const { t, lang } = useLanguage();
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ title: '', story: '', condition: '', is_anonymous: false, display_name: '' });
   const queryClient = useQueryClient();
@@ -24,15 +29,7 @@ export default function PatientStories() {
     queryKey: ['patient-stories'],
     queryFn: listPatientStories,
   });
-
-  const staticStories = [
-    { id: 'st1', title: 'From Diagnosis to Remission: My Lymphoma Journey', condition: 'Hodgkin Lymphoma', story: 'When I was diagnosed at 34, I felt the ground disappear beneath me. Six rounds of ABVD chemotherapy later, I rang the bell. It\'s been three years and I\'m still in remission. The biggest lesson? Ask questions, advocate for yourself, and lean on your care team. They\'ve seen this before. You\'re not alone.', is_anonymous: false, display_name: 'Maria G.' },
-    { id: 'st2', title: 'Living and Thriving with Type 1 Diabetes', condition: 'Type 1 Diabetes', story: 'I\'ve had T1D since I was 8. Now at 29, a CGM and insulin pump changed my life. I run marathons, travel freely, and no longer live in fear of my next blood sugar crash. Technology has given me my life back. To anyone newly diagnosed: this gets manageable. I promise.', is_anonymous: false, display_name: 'Daniel W.' },
-    { id: 'st3', title: 'My Silent Struggle with Atrial Fibrillation', condition: 'Atrial Fibrillation', story: 'I ignored my racing heart for two years, thinking it was stress. A Holter monitor caught the AF. After catheter ablation, I\'ve been symptom-free for 18 months. Please listen to your body. Heart palpitations that come and go are worth investigating — it changed everything for me.', is_anonymous: true, display_name: 'Anonymous' },
-    { id: 'st4', title: 'How I Recovered from a Major Stroke at 45', condition: 'Ischemic Stroke', story: 'I woke up one morning unable to speak or move my right arm. Months of intensive speech and physical therapy brought me back — not 100%, but close enough that I returned to teaching. Neuroplasticity is real. The brain can heal. Don\'t give up on recovery too soon.', is_anonymous: false, display_name: 'James R.' },
-  ];
-
-  const stories = dbStories.length > 0 ? dbStories : staticStories;
+  const stories = dbStories;
 
   const createMutation = useMutation({
     mutationFn: createPatientStory,
@@ -41,11 +38,24 @@ export default function PatientStories() {
       setOpen(false);
       setForm({ title: '', story: '', condition: '', is_anonymous: false, display_name: '' });
     },
+    onError: (error) => {
+      toast.error(error.message || 'Unable to share your story right now.');
+    },
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
     createMutation.mutate(form);
+  };
+
+  const handleOpenChange = (nextOpen) => {
+    if (nextOpen && !isAuthenticated) {
+      toast.error(lang === 'ar' ? 'سجّل الدخول لمشاركة قصتك.' : 'Please sign in to share your story.');
+      navigate('/login');
+      return;
+    }
+
+    setOpen(nextOpen);
   };
 
   return (
@@ -55,7 +65,7 @@ export default function PatientStories() {
           <h1 className="text-3xl md:text-4xl font-serif font-bold mb-2">{t.stories.title}</h1>
           <p className="text-muted-foreground">{t.stories.subtitle}</p>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={handleOpenChange}>
           <DialogTrigger asChild>
             <Button className="rounded-full gap-2"><Plus className="w-4 h-4" /> {t.stories.share}</Button>
           </DialogTrigger>

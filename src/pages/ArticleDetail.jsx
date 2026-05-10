@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useLanguage } from '@/lib/LanguageContext';
+import { useAuth } from '@/lib/AuthContext';
 import { useQuery } from '@tanstack/react-query';
-import { getArticle, listArticles } from '@/lib/med-api';
+import { createViewHistory, getArticle, listArticles } from '@/lib/med-api';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Clock, Eye, Shield, Heart, Share2, User } from 'lucide-react';
@@ -12,6 +13,7 @@ import ReactMarkdown from 'react-markdown';
 
 export default function ArticleDetail() {
   const { t, lang, isRTL } = useLanguage();
+  const { isAuthenticated } = useAuth();
   const { id: articleId } = useParams();
 
   const { data: article, isLoading } = useQuery({
@@ -32,6 +34,19 @@ export default function ArticleDetail() {
   const recentArticles = allArticles
     .filter(a => a.id !== articleId)
     .slice(0, 4);
+
+  useEffect(() => {
+    if (!article || !isAuthenticated) return;
+
+    createViewHistory({
+      article_id: String(article.id),
+      title: lang === 'ar' && article.title_ar ? article.title_ar : article.title,
+      cover_image: article.cover_image || '',
+      category: article.category,
+      author_name: article.author_name,
+      read_time_minutes: article.read_time_minutes || 5,
+    }).catch(() => {});
+  }, [article, isAuthenticated, lang]);
 
   if (isLoading) {
     return (

@@ -5,10 +5,12 @@ import { queryClientInstance } from '@/lib/query-client'
 import { BrowserRouter, HashRouter, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
-import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import { LanguageProvider } from '@/lib/LanguageContext';
 import { SavedArticlesProvider } from '@/lib/SavedArticlesContext';
+import { ThemeProvider } from '@/lib/ThemeContext';
+import { UserProfileProvider } from '@/lib/UserProfileContext';
 import AppLayout from '@/components/layout/AppLayout';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 import Home from '@/pages/Home';
 import Articles from '@/pages/Articles';
@@ -23,11 +25,14 @@ import SavedArticles from '@/pages/SavedArticles';
 import SymptomChecker from '@/pages/SymptomChecker';
 import HealthDashboard from '@/pages/HealthDashboard';
 import AdminKnowledgeBase from '@/pages/AdminKnowledgeBase';
+import Login from '@/pages/Login';
+import Register from '@/pages/Register';
+import UserProfile from '@/pages/UserProfile';
 
 const Router = import.meta.env.VITE_ROUTER_MODE === 'hash' ? HashRouter : BrowserRouter;
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const { isLoadingAuth, isLoadingPublicSettings } = useAuth();
 
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
@@ -35,15 +40,6 @@ const AuthenticatedApp = () => {
         <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
       </div>
     );
-  }
-
-  if (authError) {
-    if (authError.type === 'user_not_registered') {
-      return <UserNotRegisteredError />;
-    } else if (authError.type === 'auth_required') {
-      navigateToLogin();
-      return null;
-    }
   }
 
   return (
@@ -58,10 +54,20 @@ const AuthenticatedApp = () => {
         <Route path="/news" element={<MedicalNews />} />
         <Route path="/guidelines" element={<Guidelines />} />
         <Route path="/doctors" element={<Doctors />} />
-        <Route path="/saved" element={<SavedArticles />} />
         <Route path="/symptom-checker" element={<SymptomChecker />} />
-        <Route path="/dashboard" element={<HealthDashboard />} />
-        <Route path="/admin/knowledge-base" element={<AdminKnowledgeBase />} />
+
+        <Route element={<ProtectedRoute />}>
+          <Route path="/saved" element={<SavedArticles />} />
+          <Route path="/dashboard" element={<HealthDashboard />} />
+          <Route path="/profile" element={<UserProfile />} />
+        </Route>
+
+        <Route element={<ProtectedRoute requireAdmin />}>
+          <Route path="/admin/knowledge-base" element={<AdminKnowledgeBase />} />
+        </Route>
+
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
@@ -72,15 +78,19 @@ function App() {
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
-        <LanguageProvider>
-        <SavedArticlesProvider>
-        <Router>
-            <AuthenticatedApp />
-          </Router>
-          </SavedArticlesProvider>
+        <ThemeProvider>
+          <UserProfileProvider>
+            <LanguageProvider>
+            <SavedArticlesProvider>
+            <Router>
+                <AuthenticatedApp />
+              </Router>
+              </SavedArticlesProvider>
+            </LanguageProvider>
+          </UserProfileProvider>
           <Toaster />
           <Sonner richColors position="bottom-right" />
-        </LanguageProvider>
+        </ThemeProvider>
       </QueryClientProvider>
     </AuthProvider>
   )

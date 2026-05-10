@@ -1,22 +1,23 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Activity, Bookmark, House, LayoutDashboard, Newspaper } from 'lucide-react';
+import { Activity, Bookmark, House, LayoutDashboard, LogIn, Newspaper, UserPlus } from 'lucide-react';
 import { useLanguage } from '@/lib/LanguageContext';
 import { useSavedArticles } from '@/lib/SavedArticlesContext';
-
-const navItems = [
-  { to: '/', key: 'home', icon: House },
-  { to: '/articles', key: 'articles', icon: Newspaper },
-  { to: '/symptom-checker', key: 'symptomChecker', icon: Activity },
-  { to: '/saved', key: 'saved', icon: Bookmark },
-  { to: '/dashboard', key: 'dashboard', icon: LayoutDashboard },
-];
+import { useAuth } from '@/lib/AuthContext';
 
 export default function BottomNavbar() {
   const { t } = useLanguage();
+  const { isAuthenticated } = useAuth();
   const location = useLocation();
   const { savedItems } = useSavedArticles();
+  const navItems = [
+    { to: '/', key: 'home', icon: House },
+    { to: '/articles', key: 'articles', icon: Newspaper },
+    { to: '/symptom-checker', key: 'symptomChecker', icon: Activity },
+    { to: isAuthenticated ? '/saved' : '/login', key: isAuthenticated ? 'saved' : 'login', icon: isAuthenticated ? Bookmark : LogIn },
+    { to: isAuthenticated ? '/dashboard' : '/register', key: isAuthenticated ? 'dashboard' : 'register', icon: isAuthenticated ? LayoutDashboard : UserPlus },
+  ];
 
   const isActive = (path) => (
     path === '/'
@@ -63,7 +64,7 @@ export default function BottomNavbar() {
                   </div>
 
                   <span className={`relative z-10 text-[11px] font-semibold leading-none ${active ? 'text-blue-700' : 'text-slate-500'}`}>
-                    {t.nav[item.key]}
+                    {item.key === 'login' ? 'Sign In' : item.key === 'register' ? 'Join' : t.nav[item.key]}
                   </span>
                 </motion.div>
               </Link>
