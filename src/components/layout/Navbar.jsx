@@ -4,7 +4,7 @@ import { useLanguage } from '@/lib/LanguageContext';
 import { useAuth } from '@/lib/AuthContext';
 import { useTheme } from '@/lib/ThemeContext';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, Globe, Stethoscope, Bookmark, LayoutDashboard, ChevronDown, LogIn, ShieldCheck, LogOut, Moon, Sun } from 'lucide-react';
+import { Menu, Globe, Stethoscope, Bookmark, LayoutDashboard, ChevronDown, LogIn, ShieldCheck, LogOut, Moon, Sun, FilePenLine } from 'lucide-react';
 import { useSavedArticles } from '@/lib/SavedArticlesContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -145,6 +145,14 @@ export default function Navbar() {
                   </Link>
                 ) : null}
 
+                <Link
+                  to="/doctor-dashboard"
+                  title={t.nav.doctorDashboard}
+                  className={`hidden md:flex p-2 rounded-lg transition-all hover:bg-muted/60 ${isActive('/doctor-dashboard') ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground'}`}
+                >
+                  <FilePenLine className="w-[18px] h-[18px]" />
+                </Link>
+
                 <button
                   onClick={handleLogout}
                   title="Sign Out"
@@ -275,6 +283,9 @@ export default function Navbar() {
                           <ShieldCheck className="w-4 h-4" /> Knowledge Base
                         </Link>
                       ) : null}
+                      <Link to="/doctor-dashboard" onClick={() => setMobileOpen(false)} className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive('/doctor-dashboard') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}>
+                        <FilePenLine className="w-4 h-4" /> {t.nav.doctorDashboard}
+                      </Link>
                       <button onClick={handleLogout} className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium transition-all text-muted-foreground hover:text-foreground hover:bg-muted/50">
                         <LogOut className="w-4 h-4" /> Sign Out
                       </button>

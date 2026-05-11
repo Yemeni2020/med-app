@@ -31,6 +31,7 @@ import AdminKnowledgeBase from '@/pages/AdminKnowledgeBase';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import UserProfile from '@/pages/UserProfile';
+import DoctorDashboard from '@/pages/DoctorDashboard';
 
 const Router = import.meta.env.VITE_ROUTER_MODE === 'hash' ? HashRouter : BrowserRouter;
 
@@ -63,6 +64,7 @@ const AuthenticatedApp = () => {
           <Route path="/saved" element={<SavedArticles />} />
           <Route path="/dashboard" element={<HealthDashboard />} />
           <Route path="/profile" element={<UserProfile />} />
+          <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
         </Route>
 
         <Route element={<ProtectedRoute requireAdmin />}>

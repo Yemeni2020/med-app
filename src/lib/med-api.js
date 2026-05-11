@@ -217,6 +217,32 @@ export function listDoctors() {
   return medApiRequest('/doctors');
 }
 
+export function getDoctorRequest() {
+  return medApiRequest('/doctor-request');
+}
+
+export function submitDoctorRequest(payload) {
+  return medApiRequest('/doctor-request', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function listDoctorCategories() {
+  return medApiRequest('/doctor/categories');
+}
+
+export function listDoctorArticles() {
+  return medApiRequest('/doctor/articles');
+}
+
+export function createDoctorArticle(payload) {
+  return medApiRequest('/doctor/articles', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
 export function listMedicalNews() {
   return medApiRequest('/news');
 }
