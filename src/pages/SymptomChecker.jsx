@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Stethoscope, Plus, X, Loader2, AlertTriangle, CheckCircle, Info, ShieldAlert, Brain, HeartPulse, ClipboardList, ArrowRight, TimerReset, ActivitySquare } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import ErrorState from '@/components/state/ErrorState';
 
 const COMMON_SYMPTOMS = [
   'Headache', 'Fever', 'Fatigue', 'Cough', 'Shortness of breath',
@@ -433,7 +434,9 @@ export default function SymptomChecker() {
       </AnimatePresence>
 
       {error ? (
-        <p className="text-sm text-destructive mt-4 text-center">{error}</p>
+        <div className="mt-4">
+          <ErrorState title={copy.cannotAnalyze} description={error} />
+        </div>
       ) : null}
     </div>
   );

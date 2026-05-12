@@ -2,19 +2,21 @@ import React, { useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useLanguage } from '@/lib/LanguageContext';
 import { useAuth } from '@/lib/AuthContext';
-import { useQuery } from '@tanstack/react-query';
-import { createViewHistory, getArticle, listArticles } from '@/lib/med-api';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { createViewHistory, getArticle, likeArticle, listArticles, shareArticle, unlikeArticle } from '@/lib/med-api';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Clock, Eye, Shield, Heart, Share2, User } from 'lucide-react';
 import BookmarkButton from '@/components/shared/BookmarkButton';
 import { Skeleton } from '@/components/ui/skeleton';
 import ReactMarkdown from 'react-markdown';
+import { toast } from 'sonner';
 
 export default function ArticleDetail() {
   const { t, lang, isRTL } = useLanguage();
   const { isAuthenticated } = useAuth();
   const { id: articleId } = useParams();
+  const queryClient = useQueryClient();
 
   const { data: article, isLoading } = useQuery({
     queryKey: ['article', articleId],
@@ -34,6 +36,65 @@ export default function ArticleDetail() {
   const recentArticles = allArticles
     .filter(a => a.id !== articleId)
     .slice(0, 4);
+
+  const updateArticleCaches = (engagement) => {
+    queryClient.setQueryData(['article', articleId], (current) => current ? ({
+      ...current,
+      likes_count: engagement.likes_count,
+      shares_count: engagement.shares_count,
+      viewer_has_liked: engagement.viewer_has_liked,
+    }) : current);
+
+    queryClient.setQueryData(['articles'], (current) => Array.isArray(current)
+      ? current.map((item) => String(item.id) === String(articleId)
+        ? {
+            ...item,
+            likes_count: engagement.likes_count,
+            shares_count: engagement.shares_count,
+            viewer_has_liked: engagement.viewer_has_liked,
+          }
+        : item)
+      : current);
+  };
+
+  const likeMutation = useMutation({
+    mutationFn: () => article?.viewer_has_liked ? unlikeArticle(article.id) : likeArticle(article.id),
+    onSuccess: (engagement) => {
+      updateArticleCaches(engagement);
+      toast.success(
+        engagement.viewer_has_liked
+          ? (lang === 'ar' ? 'تم تسجيل الإعجاب.' : 'Article liked.')
+          : (lang === 'ar' ? 'تمت إزالة الإعجاب.' : 'Like removed.')
+      );
+    },
+    onError: (error) => {
+      toast.error(error.message || (lang === 'ar' ? 'تعذر تحديث الإعجاب.' : 'Unable to update like.'));
+    },
+  });
+
+  const shareMutation = useMutation({
+    mutationFn: async () => {
+      const url = window.location.href;
+      const title = article?.title_ar && lang === 'ar' ? article.title_ar : article?.title;
+
+      if (navigator.share) {
+        await navigator.share({ title, url });
+      } else if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url);
+      } else {
+        throw new Error(lang === 'ar' ? 'المشاركة غير مدعومة في هذا المتصفح.' : 'Sharing is not supported in this browser.');
+      }
+
+      return shareArticle(article.id);
+    },
+    onSuccess: (engagement) => {
+      updateArticleCaches(engagement);
+      toast.success(lang === 'ar' ? 'تمت مشاركة الرابط.' : 'Link shared.');
+    },
+    onError: (error) => {
+      toast.error(error.message || (lang === 'ar' ? 'تعذر مشاركة الرابط.' : 'Unable to share this article.'));
+    },
+  });
 
   useEffect(() => {
     if (!article || !isAuthenticated) return;
@@ -156,10 +217,20 @@ export default function ArticleDetail() {
 
           {/* Actions */}
           <div className="flex items-center gap-3 mt-12 pt-8 border-t border-border">
-            <Button variant="outline" className="gap-2 rounded-full">
+            <Button
+              variant="outline"
+              className={`gap-2 rounded-full ${article.viewer_has_liked ? 'border-red-200 bg-red-50 text-red-600' : ''}`}
+              onClick={() => likeMutation.mutate()}
+              disabled={likeMutation.isPending}
+            >
               <Heart className="w-4 h-4 text-red-400" /> {article.likes_count || 0} {t.articleDetail.likes}
             </Button>
-            <Button variant="outline" className="gap-2 rounded-full" onClick={() => navigator.clipboard.writeText(window.location.href)}>
+            <Button
+              variant="outline"
+              className="gap-2 rounded-full"
+              onClick={() => shareMutation.mutate()}
+              disabled={shareMutation.isPending}
+            >
               <Share2 className="w-4 h-4" /> {t.articleDetail.share}
             </Button>
             <BookmarkButton

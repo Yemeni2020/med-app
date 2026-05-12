@@ -61,6 +61,8 @@ export default function Footer() {
                 { to: '/health-tools', label: t.nav.healthTools },
                 { to: '/stories', label: t.nav.stories },
                 { to: '/qa', label: t.nav.qa },
+                { to: '/policy', label: t.footer.policy },
+                { to: '/privacy', label: t.footer.privacy },
               ].map(link => (
                 <Link key={link.to} to={link.to} className="text-sm opacity-70 hover:opacity-100 transition-opacity">
                   {link.label}

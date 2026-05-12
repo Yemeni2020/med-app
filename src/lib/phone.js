@@ -1,18 +1,22 @@
-export const COUNTRY_CODE_OPTIONS = [
-  { code: '+966', country: 'Saudi Arabia' },
-  { code: '+971', country: 'UAE' },
-  { code: '+965', country: 'Kuwait' },
-  { code: '+973', country: 'Bahrain' },
-  { code: '+974', country: 'Qatar' },
-  { code: '+968', country: 'Oman' },
-  { code: '+20', country: 'Egypt' },
-  { code: '+962', country: 'Jordan' },
-  { code: '+961', country: 'Lebanon' },
-  { code: '+1', country: 'United States' },
-  { code: '+44', country: 'United Kingdom' },
-];
+import { countryDialCodes } from '@/data/countryDialCodes';
 
-const DEFAULT_COUNTRY_CODE = '+966';
+export const COUNTRY_CODE_OPTIONS = countryDialCodes.map((entry) => ({
+  countryCode: entry.iso || entry.code,
+  displayCode: extractPrimaryCode(/\d/.test(String(entry.code || '')) ? entry.code : entry.dial_code),
+  dialCode: normalizeDialCode(/\d/.test(String(entry.code || '')) ? entry.code : entry.dial_code),
+}));
+
+const DEFAULT_COUNTRY_CODE = 'SA';
+
+function normalizeDialCode(rawCode) {
+  const firstCode = extractPrimaryCode(rawCode);
+  const digitsOnly = firstCode.replace(/\D+/g, '');
+  return digitsOnly ? `+${digitsOnly}` : '';
+}
+
+function extractPrimaryCode(rawCode) {
+  return String(rawCode || '').split(',')[0].trim();
+}
 
 export function parsePhoneValue(phone) {
   if (!phone) {
@@ -22,27 +26,31 @@ export function parsePhoneValue(phone) {
     };
   }
 
-  const normalized = String(phone).trim();
-  const match = COUNTRY_CODE_OPTIONS.find((option) => normalized.startsWith(option.code));
+  const normalized = String(phone).trim().replace(/\s+/g, '');
+  const sorted = [...COUNTRY_CODE_OPTIONS].sort((a, b) => b.dialCode.length - a.dialCode.length);
+  const match = sorted.find((option) => normalized.startsWith(option.dialCode));
 
   if (!match) {
     return {
       countryCode: DEFAULT_COUNTRY_CODE,
-      phoneNumber: normalized,
+      phoneNumber: normalized.replace(/^\+/, ''),
     };
   }
 
   return {
-    countryCode: match.code,
-    phoneNumber: normalized.slice(match.code.length).trim(),
+    countryCode: match.countryCode,
+    phoneNumber: normalized.slice(match.dialCode.length).trim(),
   };
 }
 
 export function buildPhoneValue(countryCode, phoneNumber) {
-  const trimmedNumber = String(phoneNumber || '').trim();
+  const trimmedNumber = String(phoneNumber || '').replace(/\D+/g, '');
   if (!trimmedNumber) {
     return '';
   }
 
-  return `${countryCode} ${trimmedNumber}`.trim();
+  const selected = COUNTRY_CODE_OPTIONS.find((option) => option.countryCode === countryCode);
+  const dialCode = selected?.dialCode || '+966';
+
+  return `${dialCode}${trimmedNumber}`;
 }

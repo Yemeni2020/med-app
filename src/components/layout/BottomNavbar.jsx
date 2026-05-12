@@ -7,7 +7,7 @@ import { useSavedArticles } from '@/lib/SavedArticlesContext';
 import { useAuth } from '@/lib/AuthContext';
 
 export default function BottomNavbar() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const { isAuthenticated } = useAuth();
   const location = useLocation();
   const { savedItems } = useSavedArticles();
@@ -64,7 +64,11 @@ export default function BottomNavbar() {
                   </div>
 
                   <span className={`relative z-10 text-[11px] font-semibold leading-none ${active ? 'text-blue-700' : 'text-slate-500'}`}>
-                    {item.key === 'login' ? 'Sign In' : item.key === 'register' ? 'Join' : t.nav[item.key]}
+                    {item.key === 'login'
+                      ? (lang === 'ar' ? 'دخول' : 'Sign In')
+                      : item.key === 'register'
+                        ? (lang === 'ar' ? 'تسجيل' : 'Join')
+                        : t.nav[item.key]}
                   </span>
                 </motion.div>
               </Link>

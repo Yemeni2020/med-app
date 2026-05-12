@@ -83,6 +83,7 @@ export default function UserProfile() {
 
   const initials = profile?.full_name ? profile.full_name.split(' ').map((name) => name[0]).join('').slice(0, 2).toUpperCase() : 'U';
   const age = profile?.date_of_birth ? Math.floor((new Date() - new Date(profile.date_of_birth)) / (365.25 * 24 * 3600 * 1000)) : null;
+  const isNormalUser = (profile?.role || 'patient') === 'patient';
   const TABS = [
     { id: 'overview', label: t.profile.tabs.overview, icon: LayoutDashboard },
     { id: 'health', label: t.profile.tabs.health, icon: Activity },
@@ -409,10 +410,12 @@ export default function UserProfile() {
                   {profile?.email_verified ? t.profile.account.verified : t.profile.account.verificationPending}
                 </Badge>
               </div>
-              <div className="flex justify-between py-2 border-b border-border/50">
-                <span className="text-muted-foreground">{t.profile.account.phone}</span>
-                <span className="font-medium">{profile?.phone || '—'}</span>
-              </div>
+              {!isNormalUser ? (
+                <div className="flex justify-between py-2 border-b border-border/50">
+                  <span className="text-muted-foreground">{t.profile.account.phone}</span>
+                  <span className="font-medium">{profile?.phone || '—'}</span>
+                </div>
+              ) : null}
               <div className="flex justify-between py-2 border-b border-border/50">
                 <span className="text-muted-foreground">{t.profile.account.dateOfBirth}</span>
                 <span className="font-medium">{profile?.date_of_birth ? new Date(profile.date_of_birth).toLocaleDateString() : '—'}</span>

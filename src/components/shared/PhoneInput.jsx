@@ -21,8 +21,8 @@ export default function PhoneInput({
           aria-label="Country code"
         >
           {COUNTRY_CODE_OPTIONS.map((option) => (
-            <option key={option.code} value={option.code}>
-              {option.code}
+            <option key={option.countryCode} value={option.countryCode}>
+              {`${option.displayCode} (${option.countryCode})`}
             </option>
           ))}
         </select>

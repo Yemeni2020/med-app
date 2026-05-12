@@ -1,4 +1,8 @@
-import { medApiRequest } from '@/lib/med-api';
+import { askMedicalAssistant, medApiRequest } from '@/lib/med-api';
+
+export function createMedicalAssistantResponse(payload) {
+  return askMedicalAssistant(payload);
+}
 
 export function submitMedicalAssistantFeedback({ responseId, rating, comment }) {
   return medApiRequest('/medical-assistant/feedback', {

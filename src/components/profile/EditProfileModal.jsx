@@ -12,6 +12,7 @@ const CATEGORIES = ['cardiology','neurology','oncology','pediatrics','dermatolog
 export default function EditProfileModal({ onClose }) {
   const { t } = useLanguage();
   const { profile, updateProfile, uploadAvatar } = useUserProfile();
+  const isNormalUser = (profile?.role || 'patient') === 'patient';
   const fileRef = useRef(null);
   const initialPhone = parsePhoneValue(profile?.phone);
 
@@ -96,8 +97,10 @@ export default function EditProfileModal({ onClose }) {
       const { full_name, full_name_ar, current_password, ...profileFields } = form;
       await updateProfile({
         ...profileFields,
+        phone_country_code: isNormalUser ? null : profileFields.phone_country_code,
+        phone_number: undefined,
         email: profileFields.email.trim(),
-        phone: buildPhoneValue(profileFields.phone_country_code, profileFields.phone_number) || null,
+        phone: isNormalUser ? null : (buildPhoneValue(profileFields.phone_country_code, profileFields.phone_number) || null),
         current_password: emailChanged ? current_password : undefined,
         name: {
           en: full_name,
@@ -213,17 +216,19 @@ export default function EditProfileModal({ onClose }) {
             </div>
           ) : null}
 
-          <div>
-            <label className="text-sm font-medium mb-1.5 block">{t.profile.modal.fields.phone}</label>
-            <PhoneInput
-              inputId="profile-phone"
-              countryCode={form.phone_country_code}
-              phoneNumber={form.phone_number}
-              onCountryCodeChange={(value) => setForm((current) => ({ ...current, phone_country_code: value }))}
-              onPhoneNumberChange={(value) => setForm((current) => ({ ...current, phone_number: value }))}
-              placeholder={t.profile.modal.placeholders.phone}
-            />
-          </div>
+          {!isNormalUser ? (
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">{t.profile.modal.fields.phone}</label>
+              <PhoneInput
+                inputId="profile-phone"
+                countryCode={form.phone_country_code}
+                phoneNumber={form.phone_number}
+                onCountryCodeChange={(value) => setForm((current) => ({ ...current, phone_country_code: value }))}
+                onPhoneNumberChange={(value) => setForm((current) => ({ ...current, phone_number: value }))}
+                placeholder={t.profile.modal.placeholders.phone}
+              />
+            </div>
+          ) : null}
 
           <div>
             <label className="text-sm font-medium mb-1.5 block">{t.profile.modal.fields.bio}</label>

@@ -1,6 +1,8 @@
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
 const CLIENT_ID_KEY = 'med-app-client-id';
 const ACCESS_TOKEN_KEY = 'med-app-access-token';
+const API_PREFIX = '/api/v1';
+const MED_API_PREFIX = `${API_PREFIX}/med`;
 
 export class ApiError extends Error {
   constructor(message, status, payload) {
@@ -79,11 +81,11 @@ async function request(path, options = {}) {
 }
 
 export function medApiRequest(path, options) {
-  return request(`/api/med${path}`, options);
+  return request(`${MED_API_PREFIX}${path}`, options);
 }
 
 export function apiRequest(path, options) {
-  return request(`/api${path}`, options);
+  return request(`${API_PREFIX}${path}`, options);
 }
 
 export async function login(credentials) {
@@ -106,9 +108,11 @@ export async function registerPatient({
   password,
   passwordConfirmation,
   phone = '',
+  phoneCountryCode = '',
   dateOfBirth = '',
   gender = '',
   location = '',
+  nationality = '',
   bio = '',
 }) {
   const payload = await apiRequest('/register', {
@@ -123,9 +127,11 @@ export async function registerPatient({
       password_confirmation: passwordConfirmation,
       role: 'patient',
       phone: phone || null,
+      phone_country_code: phoneCountryCode || null,
       date_of_birth: dateOfBirth || null,
       gender: gender || null,
       location: location || null,
+      nationality: nationality || null,
       bio: bio || null,
     }),
   });
@@ -179,7 +185,7 @@ export async function uploadProfileAvatar(file) {
   const formData = new FormData();
   formData.append('avatar', file);
 
-  const response = await fetch(buildUrl('/api/med/profile/avatar'), {
+  const response = await fetch(buildUrl(`${MED_API_PREFIX}/profile/avatar`), {
     method: 'POST',
     headers: {
       'X-Client-Id': getClientId(),
@@ -211,6 +217,24 @@ export async function listArticles(limit = 50) {
 
 export async function getArticle(id) {
   return medApiRequest(`/articles/${encodeURIComponent(id)}`);
+}
+
+export function likeArticle(id) {
+  return medApiRequest(`/articles/${encodeURIComponent(id)}/like`, {
+    method: 'POST',
+  });
+}
+
+export function unlikeArticle(id) {
+  return medApiRequest(`/articles/${encodeURIComponent(id)}/like`, {
+    method: 'DELETE',
+  });
+}
+
+export function shareArticle(id) {
+  return medApiRequest(`/articles/${encodeURIComponent(id)}/share`, {
+    method: 'POST',
+  });
 }
 
 export function listDoctors() {
@@ -327,8 +351,15 @@ export function clearViewHistory() {
 }
 
 export function saveNewsletterSubscription(subscription) {
-  return request('/api/newsletter/subscribe', {
+  return request(`${API_PREFIX}/newsletter/subscribe`, {
     method: 'POST',
     body: JSON.stringify(subscription),
+  });
+}
+
+export function askMedicalAssistant(payload) {
+  return medApiRequest('/medical-assistant', {
+    method: 'POST',
+    body: JSON.stringify(payload),
   });
 }

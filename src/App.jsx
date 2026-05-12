@@ -24,6 +24,7 @@ import ExpertQA from '@/pages/ExpertQA';
 import MedicalNews from '@/pages/MedicalNews';
 import Guidelines from '@/pages/Guidelines';
 import Doctors from '@/pages/Doctors';
+import LegalPage from '@/pages/LegalPage';
 import SavedArticles from '@/pages/SavedArticles';
 import SymptomChecker from '@/pages/SymptomChecker';
 import HealthDashboard from '@/pages/HealthDashboard';
@@ -58,6 +59,8 @@ const AuthenticatedApp = () => {
         <Route path="/news" element={<MedicalNews />} />
         <Route path="/guidelines" element={<Guidelines />} />
         <Route path="/doctors" element={<Doctors />} />
+        <Route path="/policy" element={<LegalPage />} />
+        <Route path="/privacy" element={<LegalPage />} />
         <Route path="/symptom-checker" element={<SymptomChecker />} />
 
         <Route element={<ProtectedRoute />}>

@@ -1,23 +1,53 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FileText, Send, ShieldCheck, Stethoscope, XCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/AuthContext';
 import { useLanguage } from '@/lib/LanguageContext';
 import { createDoctorArticle, getDoctorRequest, listDoctorArticles, listDoctorCategories, submitDoctorRequest } from '@/lib/med-api';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
+import EmptyState from '@/components/state/EmptyState';
+import ErrorState from '@/components/state/ErrorState';
+import { countryDialCodes } from '@/data/countryDialCodes';
+import { buildPhoneValue, parsePhoneValue } from '@/lib/phone';
+
+const displayNames = {
+  en: typeof Intl !== 'undefined' ? new Intl.DisplayNames(['en'], { type: 'region' }) : null,
+  ar: typeof Intl !== 'undefined' ? new Intl.DisplayNames(['ar'], { type: 'region' }) : null,
+};
+
+function getCountryNameByLang(iso, fallback, lang) {
+  const normalizedIso = String(iso || '').toUpperCase();
+  const localized = displayNames[lang]?.of(normalizedIso);
+  return localized || fallback || normalizedIso;
+}
+
+function normalizeDialCode(rawCode) {
+  const firstCode = String(rawCode || '').split(',')[0].trim();
+  const digitsOnly = firstCode.replace(/\D+/g, '');
+  return digitsOnly || '';
+}
 
 const emptyRequest = {
   specialty: '',
   license_number: '',
   organization: '',
+  contact_phone: '',
+  contact_phone_country_code: 'SA',
+  phone_local_number: '',
+  nationality: '',
+  location: '',
   years_of_experience: '',
   document_url: '',
   message: '',
+  agreed_to_policy: false,
+  agreed_to_privacy: false,
 };
 
 const emptyArticle = {
@@ -31,18 +61,57 @@ const emptyArticle = {
   heroImageUrl: '',
 };
 
+function buildRequestForm(user) {
+  const parsedPhone = parsePhoneValue(user?.phone);
+
+  return {
+    ...emptyRequest,
+    contact_phone: user?.phone || '',
+    contact_phone_country_code: user?.phone_country_code || parsedPhone.countryCode,
+    phone_local_number: parsedPhone.phoneNumber,
+    location: user?.location || '',
+  };
+}
+
 export default function DoctorDashboard() {
   const { user, refreshUser } = useAuth();
   const { t, lang } = useLanguage();
   const copy = t.doctorDashboard;
   const queryClient = useQueryClient();
-  const [requestForm, setRequestForm] = useState(emptyRequest);
+  const countryCodeOptions = useMemo(
+    () => countryDialCodes.map((entry) => {
+      const iso = entry.iso || entry.code;
+      const code = normalizeDialCode(entry.code && /\d/.test(String(entry.code)) ? entry.code : entry.dial_code);
+
+      return {
+        iso,
+        code,
+        phoneLabel: `${code} (${iso})`,
+        nationalityLabel: getCountryNameByLang(iso, entry.country || entry.name, lang),
+        nationalityValue: entry.country || entry.name || iso,
+      };
+    }),
+    [lang]
+  );
+  const [requestForm, setRequestForm] = useState(() => buildRequestForm(user));
   const [articleForm, setArticleForm] = useState(emptyArticle);
 
-  const { data: requestState, isLoading: isLoadingRequest } = useQuery({
+  const { data: requestState, isLoading: isLoadingRequest, error: requestError, refetch: refetchRequest } = useQuery({
     queryKey: ['doctor-request'],
     queryFn: getDoctorRequest,
   });
+
+  useEffect(() => {
+    const parsedPhone = parsePhoneValue(user?.phone);
+
+    setRequestForm((current) => ({
+      ...current,
+      contact_phone: current.contact_phone || user?.phone || '',
+      contact_phone_country_code: current.contact_phone_country_code || user?.phone_country_code || parsedPhone.countryCode,
+      phone_local_number: current.phone_local_number || parsedPhone.phoneNumber,
+      location: current.location || user?.location || '',
+    }));
+  }, [user?.phone, user?.phone_country_code, user?.location]);
 
   const latestRequest = requestState?.request;
   const isApprovedDoctor = Boolean(
@@ -51,13 +120,13 @@ export default function DoctorDashboard() {
       || latestRequest?.status === 'approved'
   );
 
-  const { data: categories = [] } = useQuery({
+  const { data: categories = [], error: categoriesError } = useQuery({
     queryKey: ['doctor-categories'],
     queryFn: listDoctorCategories,
     enabled: isApprovedDoctor,
   });
 
-  const { data: articlesPayload, isLoading: isLoadingArticles } = useQuery({
+  const { data: articlesPayload, isLoading: isLoadingArticles, error: articlesError, refetch: refetchArticles } = useQuery({
     queryKey: ['doctor-articles'],
     queryFn: listDoctorArticles,
     enabled: isApprovedDoctor,
@@ -67,7 +136,7 @@ export default function DoctorDashboard() {
     mutationFn: submitDoctorRequest,
     onSuccess: async () => {
       toast.success(copy.requestSent);
-      setRequestForm(emptyRequest);
+      setRequestForm(buildRequestForm(user));
       await queryClient.invalidateQueries({ queryKey: ['doctor-request'] });
     },
     onError: (error) => {
@@ -95,7 +164,19 @@ export default function DoctorDashboard() {
 
   const submitRequest = (event) => {
     event.preventDefault();
-    requestMutation.mutate(requestForm);
+
+    if (!requestForm.agreed_to_policy || !requestForm.agreed_to_privacy) {
+      toast.error(copy.requireConsents);
+      return;
+    }
+
+    const contactPhone = buildPhoneValue(requestForm.contact_phone_country_code, requestForm.phone_local_number);
+
+    requestMutation.mutate({
+      ...requestForm,
+      contact_phone_country_code: requestForm.contact_phone_country_code,
+      contact_phone: contactPhone,
+    });
   };
 
   const submitArticle = (event) => {
@@ -114,6 +195,19 @@ export default function DoctorDashboard() {
     return (
       <div className="mx-auto max-w-6xl px-4 py-10">
         <Skeleton className="h-36 rounded-2xl" />
+      </div>
+    );
+  }
+
+  if (requestError) {
+    return (
+      <div className="mx-auto max-w-6xl px-4 py-10">
+        <ErrorState
+          title={copy.title}
+          description={requestError.message}
+          actionLabel={t.common?.retry || 'Retry'}
+          onAction={() => refetchRequest()}
+        />
       </div>
     );
   }
@@ -138,6 +232,14 @@ export default function DoctorDashboard() {
               <FileText className="h-5 w-5 text-primary" />
               <h2 className="text-lg font-semibold">{copy.createArticle}</h2>
             </div>
+
+            {categoriesError ? (
+              <ErrorState
+                title={copy.createArticle}
+                description={categoriesError.message}
+                actionLabel={t.common?.retry || 'Retry'}
+              />
+            ) : null}
 
             <form onSubmit={submitArticle} className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
@@ -200,8 +302,15 @@ export default function DoctorDashboard() {
                 <Skeleton className="h-20 rounded-xl" />
                 <Skeleton className="h-20 rounded-xl" />
               </div>
+            ) : articlesError ? (
+              <ErrorState
+                title={copy.myArticles}
+                description={articlesError.message}
+                actionLabel={t.common?.retry || 'Retry'}
+                onAction={() => refetchArticles()}
+              />
             ) : articles.length === 0 ? (
-              <p className="rounded-xl bg-muted/40 p-4 text-sm text-muted-foreground">{copy.noArticles}</p>
+              <EmptyState title={copy.noArticles} description={copy.subtitle} />
             ) : (
               <div className="space-y-3">
                 {articles.map((article) => (
@@ -228,13 +337,14 @@ export default function DoctorDashboard() {
           submitRequest={submitRequest}
           isSubmitting={requestMutation.isPending}
           copy={copy}
+          countryCodeOptions={countryCodeOptions}
         />
       )}
     </div>
   );
 }
 
-function DoctorRequestPanel({ latestRequest, requestForm, updateRequest, submitRequest, isSubmitting, copy }) {
+function DoctorRequestPanel({ latestRequest, requestForm, updateRequest, submitRequest, isSubmitting, copy, countryCodeOptions }) {
   const canSubmit = !latestRequest || latestRequest.status === 'rejected';
 
   return (
@@ -273,9 +383,60 @@ function DoctorRequestPanel({ latestRequest, requestForm, updateRequest, submitR
               <Field label={copy.fields.organization}>
                 <Input value={requestForm.organization} onChange={(e) => updateRequest('organization', e.target.value)} placeholder={copy.placeholders.organization} />
               </Field>
+              <div className="space-y-2">
+                <Label htmlFor="phone-local-number">{copy.fields.contactPhone}</Label>
+                <div className="grid grid-cols-[96px_1fr] gap-2">
+                  <select
+                    id="phone-country-code"
+                    value={requestForm.contact_phone_country_code}
+                    onChange={(e) => updateRequest('contact_phone_country_code', e.target.value)}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    required
+                  >
+                    {countryCodeOptions.map((country) => (
+                      <option key={`${country.iso}-${country.code}`} value={country.iso}>
+                        {country.phoneLabel}
+                      </option>
+                    ))}
+                  </select>
+                  <Input
+                    id="phone-local-number"
+                    value={requestForm.phone_local_number}
+                    onChange={(e) => updateRequest('phone_local_number', e.target.value)}
+                    placeholder={copy.placeholders.contactPhoneLocal}
+                    inputMode="numeric"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="nationality">{copy.fields.nationality}</Label>
+                <select
+                  id="nationality"
+                  value={requestForm.nationality}
+                  onChange={(e) => updateRequest('nationality', e.target.value)}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  required
+                >
+                  <option value="">{copy.placeholders.nationality}</option>
+                  {countryCodeOptions.map((country) => (
+                    <option key={`nat-${country.iso}`} value={country.nationalityValue}>
+                      {country.nationalityLabel}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <Field label={copy.fields.location}>
+                <Input value={requestForm.location} onChange={(e) => updateRequest('location', e.target.value)} placeholder={copy.placeholders.location} required />
+              </Field>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
               <Field label={copy.fields.experience}>
                 <Input value={requestForm.years_of_experience} onChange={(e) => updateRequest('years_of_experience', e.target.value)} placeholder={copy.placeholders.experience} />
               </Field>
+              <div />
             </div>
             <Field label={copy.fields.credentialDocumentUrl}>
               <Input value={requestForm.document_url} onChange={(e) => updateRequest('document_url', e.target.value)} placeholder={copy.placeholders.url} />
@@ -283,6 +444,24 @@ function DoctorRequestPanel({ latestRequest, requestForm, updateRequest, submitR
             <Field label={copy.fields.messageToAdmin}>
               <textarea value={requestForm.message} onChange={(e) => updateRequest('message', e.target.value)} rows={5} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
             </Field>
+            <div className="space-y-3 rounded-2xl border border-border bg-muted/30 p-4">
+              <ConsentRow
+                id="agreed-policy"
+                checked={requestForm.agreed_to_policy}
+                onCheckedChange={(checked) => updateRequest('agreed_to_policy', Boolean(checked))}
+                label={copy.fields.agreedToPolicy}
+                linkTo="/policy"
+                linkLabel={copy.fields.policyLink}
+              />
+              <ConsentRow
+                id="agreed-privacy"
+                checked={requestForm.agreed_to_privacy}
+                onCheckedChange={(checked) => updateRequest('agreed_to_privacy', Boolean(checked))}
+                label={copy.fields.agreedToPrivacy}
+                linkTo="/privacy"
+                linkLabel={copy.fields.privacyLink}
+              />
+            </div>
             <Button type="submit" className="rounded-xl gap-2" disabled={isSubmitting}>
               <Send className="h-4 w-4" />
               {isSubmitting ? copy.sending : copy.sendRequest}
@@ -304,6 +483,20 @@ function Field({ label, children }) {
     <div className="space-y-2">
       <Label htmlFor={id}>{label}</Label>
       {React.cloneElement(children, { id })}
+    </div>
+  );
+}
+
+function ConsentRow({ id, checked, onCheckedChange, label, linkTo, linkLabel }) {
+  return (
+    <div className="flex items-start gap-3">
+      <Checkbox id={id} checked={checked} onCheckedChange={onCheckedChange} className="mt-0.5" />
+      <Label htmlFor={id} className="text-sm font-normal leading-6 text-foreground">
+        {label}{' '}
+        <Link to={linkTo} className="font-semibold text-primary underline-offset-4 hover:underline">
+          {linkLabel}
+        </Link>
+      </Label>
     </div>
   );
 }

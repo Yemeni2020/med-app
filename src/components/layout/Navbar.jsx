@@ -4,7 +4,7 @@ import { useLanguage } from '@/lib/LanguageContext';
 import { useAuth } from '@/lib/AuthContext';
 import { useTheme } from '@/lib/ThemeContext';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, Globe, Stethoscope, Bookmark, LayoutDashboard, ChevronDown, LogIn, ShieldCheck, LogOut, Moon, Sun, FilePenLine } from 'lucide-react';
+import { Menu, Globe, Stethoscope, Bookmark, LayoutDashboard, ChevronDown, LogIn, ShieldCheck, LogOut, Moon, Sun, FilePenLine, User } from 'lucide-react';
 import { useSavedArticles } from '@/lib/SavedArticlesContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -18,7 +18,9 @@ export default function Navbar() {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
   const moreRef = useRef(null);
+  const accountRef = useRef(null);
   const { savedItems } = useSavedArticles();
   const primaryLinks = [
     { to: '/', label: t.nav.home },
@@ -41,15 +43,22 @@ export default function Navbar() {
   useEffect(() => {
     const handler = (e) => {
       if (moreRef.current && !moreRef.current.contains(e.target)) setMoreOpen(false);
+      if (accountRef.current && !accountRef.current.contains(e.target)) setAccountOpen(false);
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
+  useEffect(() => {
+    setMoreOpen(false);
+    setAccountOpen(false);
+  }, [location.pathname]);
+
   const handleLogout = async () => {
     await logout();
     toast.success(lang === 'ar' ? 'تم تسجيل الخروج.' : 'Signed out.');
     setMobileOpen(false);
+    setAccountOpen(false);
   };
 
   return (
@@ -130,46 +139,7 @@ export default function Navbar() {
           </div>
 
           {/* Right actions */}
-          <div className="flex items-center gap-1 shrink-0">
-            {isAuthenticated ? (
-              <>
-                <UserAvatar size="sm" linkTo="/profile" />
-
-                {user?.role === 'admin' ? (
-                  <Link
-                    to="/admin/knowledge-base"
-                    title="Knowledge Base"
-                    className={`p-2 rounded-lg transition-all hover:bg-muted/60 ${isActive('/admin/knowledge-base') ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground'}`}
-                  >
-                    <ShieldCheck className="w-[18px] h-[18px]" />
-                  </Link>
-                ) : null}
-
-                <Link
-                  to="/doctor-dashboard"
-                  title={t.nav.doctorDashboard}
-                  className={`hidden md:flex p-2 rounded-lg transition-all hover:bg-muted/60 ${isActive('/doctor-dashboard') ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground'}`}
-                >
-                  <FilePenLine className="w-[18px] h-[18px]" />
-                </Link>
-
-                <button
-                  onClick={handleLogout}
-                  title="Sign Out"
-                  className="hidden md:flex p-2 rounded-lg transition-all hover:bg-muted/60 text-muted-foreground hover:text-foreground"
-                >
-                  <LogOut className="w-[18px] h-[18px]" />
-                </button>
-              </>
-            ) : (
-              <Link to="/login">
-                <Button variant="outline" size="sm" className="hidden md:inline-flex rounded-full">
-                  <LogIn className="w-4 h-4 mr-2" />
-                  Sign In
-                </Button>
-              </Link>
-            )}
-
+          <div className="flex items-center gap-1.5 shrink-0">
             <button
               onClick={toggleTheme}
               title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
@@ -188,35 +158,6 @@ export default function Navbar() {
               </AnimatePresence>
             </button>
 
-            {/* Dashboard icon */}
-            <Link
-              to="/dashboard"
-              title={t.nav.dashboard}
-              className={`hidden md:flex p-2 rounded-lg transition-all hover:bg-muted/60 ${isActive('/dashboard') ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground'}`}
-            >
-              <LayoutDashboard className="w-4.5 h-4.5 w-[18px] h-[18px]" />
-            </Link>
-
-            {/* Saved / Bookmark */}
-            <Link
-              to="/saved"
-              title={t.nav.saved}
-              className={`relative hidden md:flex p-2 rounded-lg transition-all hover:bg-muted/60 ${isActive('/saved') ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground'}`}
-            >
-              <Bookmark className={`w-[18px] h-[18px] ${isActive('/saved') ? 'fill-primary' : ''}`} />
-              <AnimatePresence>
-                {savedItems.length > 0 && (
-                  <motion.span
-                    initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}
-                    className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-primary text-primary-foreground text-[9px] font-bold rounded-full flex items-center justify-center"
-                  >
-                    {savedItems.length > 9 ? '9+' : savedItems.length}
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </Link>
-
-            {/* Language toggle */}
             <button
               onClick={toggleLang}
               className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all border border-transparent hover:border-border"
@@ -224,6 +165,103 @@ export default function Navbar() {
               <Globe className="w-3.5 h-3.5" />
               {lang === 'en' ? 'عربي' : 'EN'}
             </button>
+
+            {isAuthenticated ? (
+              <div className="relative hidden md:block" ref={accountRef}>
+                <button
+                  onClick={() => setAccountOpen((open) => !open)}
+                  className={`flex items-center gap-2 rounded-xl border px-2 py-1.5 transition-all ${
+                    accountOpen ? 'border-primary/30 bg-primary/5' : 'border-border/70 bg-background hover:bg-muted/50'
+                  }`}
+                >
+                  <UserAvatar size="sm" linkTo={null} />
+                  <span className="hidden xl:block max-w-28 truncate text-sm font-medium text-foreground">
+                    {getDisplayName(user)}
+                  </span>
+                  <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${accountOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                <AnimatePresence>
+                  {accountOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -6, scale: 0.97 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -6, scale: 0.97 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute top-full mt-2 right-0 w-64 rounded-2xl border border-border bg-card p-2 shadow-xl z-50"
+                    >
+                      <div className="flex items-center gap-3 rounded-xl px-3 py-2.5">
+                        <UserAvatar size="sm" linkTo={null} />
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-foreground">{getDisplayName(user)}</p>
+                          <p className="text-xs capitalize text-muted-foreground">{user?.role || 'member'}</p>
+                        </div>
+                      </div>
+
+                      <div className="my-2 border-t border-border/80" />
+
+                      <DesktopAccountLink
+                        to="/profile"
+                        label={lang === 'ar' ? 'الملف الشخصي' : 'Profile'}
+                        active={isActive('/profile')}
+                        onNavigate={() => setAccountOpen(false)}
+                        icon={<User className="h-4 w-4" />}
+                      />
+                      <DesktopAccountLink
+                        to="/dashboard"
+                        label={t.nav.dashboard}
+                        active={isActive('/dashboard')}
+                        onNavigate={() => setAccountOpen(false)}
+                        icon={<LayoutDashboard className="h-4 w-4" />}
+                      />
+                      <DesktopAccountLink
+                        to="/saved"
+                        label={t.nav.saved}
+                        active={isActive('/saved')}
+                        onNavigate={() => setAccountOpen(false)}
+                        icon={<Bookmark className={`h-4 w-4 ${isActive('/saved') ? 'fill-primary' : ''}`} />}
+                        badge={savedItems.length > 0 ? (savedItems.length > 99 ? '99+' : String(savedItems.length)) : null}
+                      />
+
+                      <div className="my-2 border-t border-border/80" />
+
+                      {user?.role === 'admin' ? (
+                        <DesktopAccountLink
+                          to="/admin/knowledge-base"
+                          label="Knowledge Base"
+                          active={isActive('/admin/knowledge-base')}
+                          onNavigate={() => setAccountOpen(false)}
+                          icon={<ShieldCheck className="h-4 w-4" />}
+                        />
+                      ) : null}
+
+                      <DesktopAccountLink
+                        to="/doctor-dashboard"
+                        label={t.nav.doctorDashboard}
+                        active={isActive('/doctor-dashboard')}
+                        onNavigate={() => setAccountOpen(false)}
+                        icon={<FilePenLine className="h-4 w-4" />}
+                      />
+
+                      <button
+                        onClick={handleLogout}
+                        className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition-all hover:bg-muted/60 hover:text-foreground"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        <span>{lang === 'ar' ? 'تسجيل الخروج' : 'Sign Out'}</span>
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ) : (
+              <Link to="/login">
+                <Button variant="outline" size="sm" className="hidden md:inline-flex rounded-full">
+                  <LogIn className="w-4 h-4 mr-2" />
+                  {lang === 'ar' ? 'تسجيل الدخول' : 'Sign In'}
+                </Button>
+              </Link>
+            )}
 
             {/* Mobile menu */}
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
@@ -292,7 +330,7 @@ export default function Navbar() {
                     </>
                   ) : (
                     <Link to="/login" onClick={() => setMobileOpen(false)} className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive('/login') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}>
-                      <LogIn className="w-4 h-4" /> Sign In
+                      <LogIn className="w-4 h-4" /> {lang === 'ar' ? 'تسجيل الدخول' : 'Sign In'}
                     </Link>
                   )}
                   <Link to="/dashboard" onClick={() => setMobileOpen(false)} className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive('/dashboard') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}>
@@ -316,4 +354,24 @@ function getDisplayName(user) {
   if (!user?.name) return 'Profile';
   if (typeof user.name === 'string') return user.name;
   return user.name.en || user.name.ar || 'Profile';
+}
+
+function DesktopAccountLink({ to, label, active, icon, badge = null, onNavigate }) {
+  return (
+    <Link
+      to={to}
+      onClick={onNavigate}
+      className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
+        active ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
+      }`}
+    >
+      {icon}
+      <span className="flex-1">{label}</span>
+      {badge ? (
+        <span className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${active ? 'bg-primary/15 text-primary' : 'bg-muted text-foreground'}`}>
+          {badge}
+        </span>
+      ) : null}
+    </Link>
+  );
 }

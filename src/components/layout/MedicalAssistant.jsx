@@ -25,15 +25,15 @@ import {
 import ReactMarkdown from 'react-markdown';
 import { useLanguage } from '@/lib/LanguageContext';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { submitMedicalAssistantFeedback } from '@/lib/medical-assistant-api';
+import { createMedicalAssistantResponse, submitMedicalAssistantFeedback } from '@/lib/medical-assistant-api';
 
 const MIN_THINKING_MS = 5000;
 
 const CONTENT = {
   en: {
     name: 'MedBot AI Assistant',
-    statusOnline: 'Online · Medical AI',
-    statusOffline: 'Offline · Local model unavailable',
+    statusOnline: 'Online · Medical API',
+    statusOffline: 'Offline · Medical API unavailable',
     welcome: "Hello. I'm MedBot, the medical assistant on MedBlog.\n\nI explain symptoms, common conditions, medications, and when to seek care using the approved medical knowledge base.\n\nImportant: I provide general health information only. I do not replace a licensed clinician, and I do not diagnose or prescribe.",
     quickLabel: 'Quick questions',
     quickPrompts: [
@@ -68,7 +68,7 @@ const CONTENT = {
     feedbackSaved: 'Feedback saved.',
     sourceFreshness: 'Review status',
     sourceReviewedBy: 'Reviewer',
-    unavailable: 'Local AI is not ready. Start Ollama locally and install the configured model.',
+    unavailable: 'The medical assistant is temporarily unavailable. Please try again shortly.',
     ageGroupOptions: ['Adult', 'Child', 'Older adult'],
     durationOptions: ['Less than 24 hours', '1 to 3 days', 'More than 3 days'],
     severityOptions: ['Mild', 'Moderate', 'Severe'],
@@ -76,8 +76,8 @@ const CONTENT = {
   },
   ar: {
     name: 'مساعد ميدبوت الذكي',
-    statusOnline: 'متصل · ذكاء اصطناعي طبي',
-    statusOffline: 'غير متصل · النموذج المحلي غير جاهز',
+    statusOnline: 'متصل · واجهة طبية',
+    statusOffline: 'غير متصل · الواجهة الطبية غير متاحة',
     welcome: 'مرحبًا. أنا ميدبوت، المساعد الطبي في MedBlog.\n\nأشرح الأعراض والحالات الشائعة والأدوية ومتى يجب طلب الرعاية بالاعتماد على قاعدة المعرفة الطبية المعتمدة.\n\nمهم: أقدم معلومات صحية عامة فقط. لا أستبدل الطبيب المرخّص، ولا أقدّم تشخيصًا أو وصفًا دوائيًا.',
     quickLabel: 'أسئلة سريعة',
     quickPrompts: [
@@ -112,7 +112,7 @@ const CONTENT = {
     feedbackSaved: 'تم حفظ التقييم.',
     sourceFreshness: 'حالة المراجعة',
     sourceReviewedBy: 'المراجع',
-    unavailable: 'الذكاء المحلي غير جاهز. شغّل Ollama محليًا وثبّت النموذج المحدد.',
+    unavailable: 'المساعد الطبي غير متاح مؤقتًا. حاول مرة أخرى بعد قليل.',
     ageGroupOptions: ['بالغ', 'طفل', 'كبير سن'],
     durationOptions: ['أقل من 24 ساعة', 'من يوم إلى 3 أيام', 'أكثر من 3 أيام'],
     severityOptions: ['خفيفة', 'متوسطة', 'شديدة'],
@@ -128,15 +128,6 @@ const INITIAL_INTAKE = {
   pregnancy: '',
   chronicConditions: '',
 };
-
-function ensureClientId() {
-  if (typeof window === 'undefined') return 'server-render';
-  const existing = window.localStorage.getItem('med-app-client-id');
-  if (existing) return existing;
-  const created = window.crypto?.randomUUID?.() || `client-${Date.now()}`;
-  window.localStorage.setItem('med-app-client-id', created);
-  return created;
-}
 
 const URGENCY_META = {
   emergency: {
@@ -587,32 +578,18 @@ export default function MedicalAssistant() {
         reveal();
       };
 
-      const response = await fetch('/api/med/medical-assistant', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Client-Id': ensureClientId(),
-        },
-        body: JSON.stringify({
-          lang,
-          message: userText,
-          history,
-          intake: activeIntake,
-        }),
-      });
-
-      if (!response.ok) {
-        const payload = await response.json().catch(() => ({}));
-        throw new Error(payload?.error || copy.unavailable);
-      }
-
-      setAssistantOnline(true);
       const minimumDelayPromise = revealAfterDelay();
-      const data = await response.json();
+      const data = await createMedicalAssistantResponse({
+        lang,
+        message: userText,
+        history,
+        intake: activeIntake,
+      });
+      setAssistantOnline(true);
       bufferedText = data.answer || '';
       finalPayload = {
         responseId: data.responseId || '',
-        citations: Array.isArray(data.citations) ? data.citations : [],
+        citations: Array.isArray(data.sources) ? data.sources : (Array.isArray(data.citations) ? data.citations : []),
         assessment: data.assessment || null,
         answer: data.answer || '',
       };

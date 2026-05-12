@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import PhoneInput from '@/components/shared/PhoneInput';
+import { buildPhoneValue, parsePhoneValue } from '@/lib/phone';
 
 function getDisplayName(user) {
   if (!user?.name) return '';
@@ -23,14 +25,17 @@ export default function Profile() {
   });
 
   const profile = profileQuery.data || user;
+  const isNormalUser = (profile?.role || 'patient') === 'patient';
+  const parsedPhone = parsePhoneValue(profile?.phone);
   const [form, setForm] = useState(null);
 
   const initialForm = useMemo(() => ({
     name: getDisplayName(profile),
-    phone: profile?.phone || '',
+    phoneCountryCode: profile?.phone_country_code || parsedPhone.countryCode,
+    phoneNumber: parsedPhone.phoneNumber,
     avatarUrl: profile?.avatar_url || '',
     language: profile?.language || 'en',
-  }), [profile]);
+  }), [parsedPhone.countryCode, parsedPhone.phoneNumber, profile]);
 
   const currentForm = form || initialForm;
 
@@ -50,7 +55,8 @@ export default function Profile() {
           en: currentForm.name,
           ar: currentForm.name,
         },
-        phone: currentForm.phone || null,
+        phone: isNormalUser ? null : (buildPhoneValue(currentForm.phoneCountryCode, currentForm.phoneNumber) || null),
+        phone_country_code: isNormalUser ? null : (currentForm.phoneCountryCode || null),
         avatar_url: currentForm.avatarUrl || null,
         language: currentForm.language,
       });
@@ -93,10 +99,19 @@ export default function Profile() {
               <Input id="profile-email" value={profile?.email || ''} disabled />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="profile-phone">Phone</Label>
-              <Input id="profile-phone" value={currentForm.phone} onChange={(e) => updateField('phone', e.target.value)} />
-            </div>
+            {!isNormalUser ? (
+              <div className="space-y-2">
+                <Label htmlFor="profile-phone">Phone</Label>
+                <PhoneInput
+                  inputId="profile-phone"
+                  countryCode={currentForm.phoneCountryCode}
+                  phoneNumber={currentForm.phoneNumber}
+                  onCountryCodeChange={(value) => updateField('phoneCountryCode', value)}
+                  onPhoneNumberChange={(value) => updateField('phoneNumber', value)}
+                  placeholder="5XXXXXXXX"
+                />
+              </div>
+            ) : null}
 
             <div className="space-y-2">
               <Label htmlFor="profile-avatar">Avatar URL</Label>
