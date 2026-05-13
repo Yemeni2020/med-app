@@ -60,6 +60,7 @@ function buildUrl(path) {
 async function request(path, options = {}) {
   const token = getAccessToken();
   const headers = {
+    Accept: 'application/json',
     'Content-Type': 'application/json',
     'X-Client-Id': getClientId(),
     'X-App-Locale': typeof document !== 'undefined' ? document.documentElement.lang || 'en' : 'en',
@@ -387,6 +388,14 @@ export function removeSavedItem(itemId) {
 
 export function listHealthMetrics() {
   return medApiRequest('/health-metrics');
+}
+
+export function listSymptomHistory() {
+  return medApiRequest('/symptom-history');
+}
+
+export function getHealthInsights() {
+  return medApiRequest('/health-insights');
 }
 
 export function createHealthMetric(metric) {

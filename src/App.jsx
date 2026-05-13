@@ -29,6 +29,7 @@ import LegalPage from '@/pages/LegalPage';
 import SavedArticles from '@/pages/SavedArticles';
 import SymptomChecker from '@/pages/SymptomChecker';
 import HealthDashboard from '@/pages/HealthDashboard';
+import HealthInsights from '@/pages/HealthInsights';
 import AdminKnowledgeBase from '@/pages/AdminKnowledgeBase';
 import AdminReviews from '@/pages/AdminReviews';
 import Login from '@/pages/Login';
@@ -71,6 +72,7 @@ const AuthenticatedApp = () => {
         <Route element={<ProtectedRoute />}>
           <Route path="/saved" element={<SavedArticles />} />
           <Route path="/dashboard" element={<HealthDashboard />} />
+          <Route path="/health-insights" element={<HealthInsights />} />
           <Route path="/profile" element={<UserProfile />} />
           <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
         </Route>

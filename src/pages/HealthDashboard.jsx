@@ -7,7 +7,7 @@ import MetricChart from '@/components/dashboard/MetricChart';
 import AddMetricModal from '@/components/dashboard/AddMetricModal';
 import TrendingTopics from '@/components/dashboard/TrendingTopics';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, Plus, Stethoscope, Bookmark, TrendingUp, LibraryBig } from 'lucide-react';
+import { LayoutDashboard, Plus, Stethoscope, Bookmark, TrendingUp, LibraryBig, Brain } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/lib/LanguageContext';
 import PageSeo from '@/components/seo/PageSeo';
@@ -172,6 +172,11 @@ export default function HealthDashboard() {
               <Link to="/health-tools">
                 <Button variant="outline" size="sm" className="w-full justify-start gap-2 rounded-xl">
                   <TrendingUp className="w-4 h-4 text-primary" /> {t.dashboard.healthTools}
+                </Button>
+              </Link>
+              <Link to="/health-insights">
+                <Button variant="outline" size="sm" className="w-full justify-start gap-2 rounded-xl">
+                  <Brain className="w-4 h-4 text-primary" /> {t.dashboard.healthInsights}
                 </Button>
               </Link>
               {user?.role === 'admin' ? (

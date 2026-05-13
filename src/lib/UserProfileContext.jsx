@@ -1,15 +1,19 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { getProfile, updateProfile as saveProfile, uploadProfileAvatar } from '@/lib/med-api';
+import { ApiError, getProfile, updateProfile as saveProfile, uploadProfileAvatar } from '@/lib/med-api';
 import { useAuth } from '@/lib/AuthContext';
 
 const UserProfileContext = createContext(null);
 
 export function UserProfileProvider({ children }) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, authChecked } = useAuth();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = useCallback(async () => {
+    if (!authChecked) {
+      return;
+    }
+
     if (!isAuthenticated) {
       setProfile(null);
       setLoading(false);
@@ -19,12 +23,15 @@ export function UserProfileProvider({ children }) {
     try {
       const me = await getProfile();
       setProfile(me);
-    } catch {
+    } catch (error) {
+      if (!(error instanceof ApiError && error.status === 401)) {
+        throw error;
+      }
       setProfile(null);
     } finally {
       setLoading(false);
     }
-  }, [isAuthenticated]);
+  }, [authChecked, isAuthenticated]);
 
   useEffect(() => {
     setLoading(true);

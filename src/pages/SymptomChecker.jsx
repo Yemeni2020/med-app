@@ -7,6 +7,8 @@ import { Stethoscope, Plus, X, Loader2, AlertTriangle, CheckCircle, Info, Shield
 import { motion, AnimatePresence } from 'framer-motion';
 import ErrorState from '@/components/state/ErrorState';
 import PageSeo from '@/components/seo/PageSeo';
+import { Link } from 'react-router-dom';
+import { useAuth } from '@/lib/AuthContext';
 
 const COMMON_SYMPTOMS = [
   'Headache', 'Fever', 'Fatigue', 'Cough', 'Shortness of breath',
@@ -69,6 +71,7 @@ const SUMMARY_ICONS = [HeartPulse, Brain, ActivitySquare];
 
 export default function SymptomChecker() {
   const { t, lang, isRTL } = useLanguage();
+  const { isAuthenticated } = useAuth();
   const copy = PAGE_COPY[lang] || PAGE_COPY.en;
   const [symptoms, setSymptoms] = useState([]);
   const [inputValue, setInputValue] = useState('');
@@ -431,6 +434,13 @@ export default function SymptomChecker() {
               <TimerReset className="w-4 h-4" />
               {copy.resetAssessment}
             </Button>
+            {isAuthenticated ? (
+              <Link to="/health-insights" className="block">
+                <Button variant="ghost" className="w-full rounded-xl">
+                  {t.healthInsights.viewCorrelations}
+                </Button>
+              </Link>
+            ) : null}
           </motion.div>
         ) : null}
       </AnimatePresence>
