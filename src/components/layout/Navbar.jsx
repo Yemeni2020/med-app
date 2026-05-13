@@ -225,14 +225,23 @@ export default function Navbar() {
 
                       <div className="my-2 border-t border-border/80" />
 
-                      {user?.role === 'admin' ? (
-                        <DesktopAccountLink
-                          to="/admin/knowledge-base"
-                          label="Knowledge Base"
-                          active={isActive('/admin/knowledge-base')}
-                          onNavigate={() => setAccountOpen(false)}
-                          icon={<ShieldCheck className="h-4 w-4" />}
-                        />
+                      {['admin', 'manager'].includes(user?.role) ? (
+                        <>
+                          <DesktopAccountLink
+                            to="/admin/knowledge-base"
+                            label="Knowledge Base"
+                            active={isActive('/admin/knowledge-base')}
+                            onNavigate={() => setAccountOpen(false)}
+                            icon={<ShieldCheck className="h-4 w-4" />}
+                          />
+                          <DesktopAccountLink
+                            to="/admin/reviews"
+                            label={lang === 'ar' ? 'إدارة المراجعات' : 'Review Moderation'}
+                            active={isActive('/admin/reviews')}
+                            onNavigate={() => setAccountOpen(false)}
+                            icon={<ShieldCheck className="h-4 w-4" />}
+                          />
+                        </>
                       ) : null}
 
                       <DesktopAccountLink
@@ -316,10 +325,15 @@ export default function Navbar() {
                       <Link to="/profile" onClick={() => setMobileOpen(false)} className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive('/profile') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}>
                         <UserAvatar size="sm" linkTo={null} /> {getDisplayName(user)}
                       </Link>
-                      {user?.role === 'admin' ? (
-                        <Link to="/admin/knowledge-base" onClick={() => setMobileOpen(false)} className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive('/admin/knowledge-base') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}>
-                          <ShieldCheck className="w-4 h-4" /> Knowledge Base
-                        </Link>
+                      {['admin', 'manager'].includes(user?.role) ? (
+                        <>
+                          <Link to="/admin/knowledge-base" onClick={() => setMobileOpen(false)} className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive('/admin/knowledge-base') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}>
+                            <ShieldCheck className="w-4 h-4" /> Knowledge Base
+                          </Link>
+                          <Link to="/admin/reviews" onClick={() => setMobileOpen(false)} className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive('/admin/reviews') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}>
+                            <ShieldCheck className="w-4 h-4" /> {lang === 'ar' ? 'إدارة المراجعات' : 'Review Moderation'}
+                          </Link>
+                        </>
                       ) : null}
                       <Link to="/doctor-dashboard" onClick={() => setMobileOpen(false)} className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive('/doctor-dashboard') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}>
                         <FilePenLine className="w-4 h-4" /> {t.nav.doctorDashboard}

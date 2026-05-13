@@ -7,6 +7,7 @@ import { Bookmark, BookmarkX, Clock, ArrowLeft } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import BookmarkButton from '@/components/shared/BookmarkButton';
 import { useLanguage } from '@/lib/LanguageContext';
+import PageSeo from '@/components/seo/PageSeo';
 
 export default function SavedArticles() {
   const { t, isRTL } = useLanguage();
@@ -15,6 +16,7 @@ export default function SavedArticles() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
+      <PageSeo page="saved" />
       <div className="flex items-center gap-4 mb-2">
         <Link to="/">
           <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground">

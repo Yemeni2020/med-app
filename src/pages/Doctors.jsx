@@ -1,12 +1,14 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import React, { useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { useLanguage } from '@/lib/LanguageContext';
 import { useQuery } from '@tanstack/react-query';
-import { listArticles, listDoctors } from '@/lib/med-api';
+import { listDoctors } from '@/lib/med-api';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Clock, Eye, Search, ArrowLeft, BookOpen, ChevronRight } from 'lucide-react';
+import { Search, BookOpen, ChevronRight } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import RatingSummary from '@/components/reviews/RatingSummary';
+import PageSeo from '@/components/seo/PageSeo';
 
 const PAGE_COPY = {
   en: {
@@ -51,12 +53,12 @@ const PAGE_COPY = {
   },
 };
 
-function DoctorCard({ doctor, articles, onSelect }) {
+function DoctorCard({ doctor }) {
   const { t, isRTL } = useLanguage();
   return (
-    <div
-      className="bg-card border border-border rounded-2xl p-6 hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer group"
-      onClick={() => onSelect(doctor)}
+    <Link
+      to={`/doctors/${doctor.id}`}
+      className="block bg-card border border-border rounded-2xl p-6 hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer group"
     >
       <div className="flex items-start gap-4">
         <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 text-2xl font-bold text-primary group-hover:bg-primary/20 transition-colors">
@@ -72,99 +74,14 @@ function DoctorCard({ doctor, articles, onSelect }) {
           <div className="flex items-center gap-3 mt-2 flex-wrap">
             <Badge variant="secondary" className="rounded-full text-xs capitalize">{doctor.specialty?.replace('_', ' ')}</Badge>
             <span className="text-xs text-muted-foreground flex items-center gap-1">
-              <BookOpen className="w-3 h-3" /> {articles.length} {t.home.doctors.articles}
+              <BookOpen className="w-3 h-3" /> {doctor.articles_count || 0} {t.home.doctors.articles}
             </span>
+            <RatingSummary averageRating={doctor.average_rating} reviewCount={doctor.review_count} />
           </div>
         </div>
         <ChevronRight className={`w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0 mt-1 ${isRTL ? 'rotate-180' : ''}`} />
       </div>
-    </div>
-  );
-}
-
-function DoctorProfile({ doctor, articles, onBack }) {
-  const { t, lang, isRTL } = useLanguage();
-  const copy = PAGE_COPY[lang] || PAGE_COPY.en;
-  const totalViews = articles.reduce((sum, a) => sum + (a.views_count || 0), 0);
-  const totalLikes = articles.reduce((sum, a) => sum + (a.likes_count || 0), 0);
-
-  return (
-    <div>
-      <button onClick={onBack} className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors text-sm font-medium">
-        <ArrowLeft className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
-        {t.doctors.backToAll}
-      </button>
-
-      {/* Profile Header */}
-      <div className="bg-card border border-border rounded-2xl p-8 mb-8">
-        <div className="flex flex-col sm:flex-row gap-6 items-start">
-          <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center text-4xl font-bold text-primary flex-shrink-0">
-            {doctor.author_avatar ? (
-              <img src={doctor.author_avatar} alt={doctor.name} className="w-full h-full rounded-full object-cover" />
-            ) : (
-              doctor.name?.[0]
-            )}
-          </div>
-          <div className="flex-1">
-            <h1 className="font-serif font-bold text-3xl mb-1">{doctor.name}</h1>
-            {doctor.title && <p className="text-muted-foreground text-base mb-1">{doctor.title}</p>}
-            {doctor.institution && <p className="text-primary text-sm font-medium mb-3">{copy.institutions[doctor.institution] || doctor.institution}</p>}
-            <div className="flex flex-wrap gap-2 mb-4">
-              <Badge className="rounded-full capitalize">{doctor.specialty?.replace('_', ' ')}</Badge>
-            </div>
-            {doctor.bio && <p className="text-foreground/80 leading-relaxed">{doctor.bio}</p>}
-          </div>
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-border">
-          <div className="text-center">
-            <p className="text-2xl font-bold text-primary">{articles.length}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">{t.doctors.articlesPublished}</p>
-          </div>
-          <div className="text-center">
-            <p className="text-2xl font-bold text-primary">{totalViews.toLocaleString()}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">{t.doctors.totalViews}</p>
-          </div>
-          <div className="text-center">
-            <p className="text-2xl font-bold text-primary">{totalLikes.toLocaleString()}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">{t.doctors.totalLikes}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Articles */}
-      <h2 className="font-serif font-bold text-2xl mb-5">{t.doctors.publishedArticles}</h2>
-      <div className="space-y-4">
-        {articles.map(article => {
-          const title = lang === 'ar' && article.title_ar ? article.title_ar : article.title;
-          const excerpt = lang === 'ar' && article.excerpt_ar ? article.excerpt_ar : article.excerpt;
-          return (
-            <Link key={article.id} to={`/articles/${article.id}`} className="block group">
-              <div className="bg-card border border-border rounded-2xl p-5 hover:shadow-md hover:border-primary/30 transition-all">
-                <div className="flex gap-4">
-                  {article.cover_image && (
-                    <img src={article.cover_image} alt={title} className="w-24 h-20 rounded-xl object-cover flex-shrink-0" />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Badge variant="secondary" className="rounded-full text-xs">{t.categories[article.category]}</Badge>
-                      {article.is_peer_reviewed && <Badge variant="outline" className="rounded-full text-xs">{t.common.peerReviewed}</Badge>}
-                    </div>
-                    <h3 className="font-semibold text-base leading-snug group-hover:text-primary transition-colors line-clamp-2">{title}</h3>
-                    <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{excerpt}</p>
-                    <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {article.read_time_minutes || 5} {t.common.minRead}</span>
-                      <span className="flex items-center gap-1"><Eye className="w-3 h-3" /> {(article.views_count || 0).toLocaleString()}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Link>
-          );
-        })}
-      </div>
-    </div>
+    </Link>
   );
 }
 
@@ -172,17 +89,10 @@ export default function Doctors() {
   const { t, lang } = useLanguage();
   const copy = PAGE_COPY[lang] || PAGE_COPY.en;
   const [search, setSearch] = useState('');
-  const [selectedDoctor, setSelectedDoctor] = useState(null);
-  const [searchParams] = useSearchParams();
-  const authorParam = searchParams.get('author');
 
   const { data: doctors = [], isLoading } = useQuery({
     queryKey: ['doctors'],
     queryFn: listDoctors,
-  });
-  const { data: articles = [] } = useQuery({
-    queryKey: ['doctor-articles'],
-    queryFn: () => listArticles(100),
   });
 
   // Static bios keyed by doctor name
@@ -233,14 +143,6 @@ export default function Doctors() {
     };
   }), [doctors, copy]);
 
-  // Auto-select from URL param
-  useEffect(() => {
-    if (authorParam && mappedDoctors.length > 0) {
-      const found = mappedDoctors.find(d => d.name === decodeURIComponent(authorParam));
-      if (found) setSelectedDoctor(found);
-    }
-  }, [authorParam, mappedDoctors]);
-
   const filteredDoctors = mappedDoctors.filter(d => {
     const query = search.toLowerCase();
     return !search
@@ -250,22 +152,9 @@ export default function Doctors() {
       || t.categories[d.specialty]?.toLowerCase().includes(query);
   });
 
-  const getDoctorArticles = (doctor) => articles.filter(a => a.author_name === doctor.name);
-
-  if (selectedDoctor) {
-    return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
-        <DoctorProfile
-          doctor={selectedDoctor}
-          articles={getDoctorArticles(selectedDoctor)}
-          onBack={() => setSelectedDoctor(null)}
-        />
-      </div>
-    );
-  }
-
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10">
+      <PageSeo page="doctors" />
       {/* Header */}
       <div className="mb-10">
         <h1 className="text-3xl md:text-4xl font-serif font-bold mb-2">{t.doctors.title}</h1>
@@ -292,12 +181,7 @@ export default function Doctors() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filteredDoctors.map(doctor => (
-            <DoctorCard
-              key={doctor.name}
-              doctor={doctor}
-              articles={getDoctorArticles(doctor)}
-              onSelect={setSelectedDoctor}
-            />
+            <DoctorCard key={doctor.id} doctor={doctor} />
           ))}
         </div>
       )}

@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { LayoutDashboard, Plus, Stethoscope, Bookmark, TrendingUp, LibraryBig } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/lib/LanguageContext';
+import PageSeo from '@/components/seo/PageSeo';
 
 const METRIC_META = {
   weight: { label: 'Weight', unit: 'kg', color: '#0ea5e9' },
@@ -53,6 +54,7 @@ export default function HealthDashboard() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+      <PageSeo page="dashboard" />
       {/* Header */}
       <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
         <div className="flex items-center gap-3">

@@ -207,6 +207,19 @@ export function getMedSetting(key) {
   return medApiRequest(`/settings/${encodeURIComponent(key)}`);
 }
 
+export function getSeoPage(page, params = {}) {
+  const search = new URLSearchParams();
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      search.set(key, String(value));
+    }
+  });
+
+  const suffix = search.toString() ? `?${search.toString()}` : '';
+  return medApiRequest(`/seo/${encodeURIComponent(page)}${suffix}`);
+}
+
 export function listGuidelines() {
   return medApiRequest('/guidelines');
 }
@@ -217,6 +230,14 @@ export async function listArticles(limit = 50) {
 
 export async function getArticle(id) {
   return medApiRequest(`/articles/${encodeURIComponent(id)}`);
+}
+
+export async function getDoctor(id) {
+  return medApiRequest(`/doctors/${encodeURIComponent(id)}`);
+}
+
+export async function getPatientStory(id) {
+  return medApiRequest(`/patient-stories/${encodeURIComponent(id)}`);
 }
 
 export function likeArticle(id) {
@@ -239,6 +260,60 @@ export function shareArticle(id) {
 
 export function listDoctors() {
   return medApiRequest('/doctors');
+}
+
+export function listReviews(reviewableType, reviewableId, options = {}) {
+  const params = new URLSearchParams();
+
+  if (reviewableType) {
+    params.set('reviewable_type', reviewableType);
+  }
+
+  if (reviewableId !== undefined && reviewableId !== null && reviewableId !== '') {
+    params.set('reviewable_id', String(reviewableId));
+  }
+
+  if (options.status) {
+    params.set('status', options.status);
+  }
+
+  return medApiRequest(`/reviews?${params.toString()}`);
+}
+
+export function getReview(reviewId) {
+  return medApiRequest(`/reviews/${encodeURIComponent(reviewId)}`);
+}
+
+export function createReview(payload) {
+  return medApiRequest('/reviews', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateReview(reviewId, payload) {
+  return medApiRequest(`/reviews/${encodeURIComponent(reviewId)}`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deleteReview(reviewId) {
+  return medApiRequest(`/reviews/${encodeURIComponent(reviewId)}`, {
+    method: 'DELETE',
+  });
+}
+
+export function moderateReview(reviewId, payload) {
+  return medApiRequest(`/reviews/${encodeURIComponent(reviewId)}/moderate`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function listReviewModerationQueue(status = 'pending') {
+  const query = status ? `?status=${encodeURIComponent(status)}` : '';
+  return medApiRequest(`/reviews/moderation${query}`);
 }
 
 export function getDoctorRequest() {

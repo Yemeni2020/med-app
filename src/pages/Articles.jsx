@@ -7,6 +7,7 @@ import { useSearchParams } from 'react-router-dom';
 import { Search, X } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion, AnimatePresence } from 'framer-motion';
+import PageSeo from '@/components/seo/PageSeo';
 
 const CATEGORY_ICONS = {
   all: '🔬',
@@ -26,8 +27,9 @@ export default function Articles() {
   const { t, lang } = useLanguage();
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const urlCategory = searchParams.get('category');
+  const urlSearch = searchParams.get('q') || '';
 
   const { data: articles = [], isLoading } = useQuery({
     queryKey: ['articles'],
@@ -59,13 +61,44 @@ export default function Articles() {
   }, [urlCategory, categories]);
 
   useEffect(() => {
+    if (urlSearch !== search) {
+      setSearch(urlSearch);
+    }
+  }, [urlSearch, search]);
+
+  useEffect(() => {
     if (activeCategory !== 'all' && !categories.includes(activeCategory)) {
       setActiveCategory('all');
     }
   }, [activeCategory, categories]);
 
+  const syncParams = (nextSearch, nextCategory) => {
+    const params = new URLSearchParams(searchParams);
+
+    if (nextSearch) {
+      params.set('q', nextSearch);
+    } else {
+      params.delete('q');
+    }
+
+    if (nextCategory && nextCategory !== 'all') {
+      params.set('category', nextCategory);
+    } else {
+      params.delete('category');
+    }
+
+    setSearchParams(params, { replace: true });
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+      <PageSeo
+        page={search.trim() ? 'search' : 'articles'}
+        params={{
+          query: search.trim() || undefined,
+          category: activeCategory !== 'all' ? activeCategory : undefined,
+        }}
+      />
 
       {/* Header + Search */}
       <div className="mb-10">
@@ -79,7 +112,11 @@ export default function Articles() {
             <Search className="w-5 h-5 text-muted-foreground shrink-0" />
             <input
               value={search}
-              onChange={e => setSearch(e.target.value)}
+              onChange={(e) => {
+                const next = e.target.value;
+                setSearch(next);
+                syncParams(next, activeCategory);
+              }}
               placeholder={`${t.common.search} ${t.articlesPage.searchSuffix}`}
               className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground/60 text-foreground"
             />
@@ -89,7 +126,10 @@ export default function Articles() {
                   initial={{ scale: 0, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   exit={{ scale: 0, opacity: 0 }}
-                  onClick={() => setSearch('')}
+                  onClick={() => {
+                    setSearch('');
+                    syncParams('', activeCategory);
+                  }}
                   className="w-6 h-6 rounded-full bg-muted flex items-center justify-center shrink-0 hover:bg-muted-foreground/20 transition-colors"
                 >
                   <X className="w-3.5 h-3.5 text-muted-foreground" />
@@ -112,7 +152,10 @@ export default function Articles() {
           {categories.map(cat => (
             <motion.button
               key={cat}
-              onClick={() => setActiveCategory(cat)}
+              onClick={() => {
+                setActiveCategory(cat);
+                syncParams(search, cat);
+              }}
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.97 }}
               className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-all border whitespace-nowrap

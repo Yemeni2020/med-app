@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Search, ExternalLink, BookOpen, Shield } from 'lucide-react';
 import { motion } from 'framer-motion';
+import PageSeo from '@/components/seo/PageSeo';
 
 const PAGE_COPY = {
   en: {
@@ -55,6 +56,7 @@ export default function Guidelines() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+      <PageSeo page="guidelines" />
       <div className="mb-10">
         <div className="flex items-center gap-3 mb-2">
           <BookOpen className="w-6 h-6 text-primary" />

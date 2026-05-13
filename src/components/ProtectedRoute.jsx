@@ -19,7 +19,7 @@ export default function ProtectedRoute({ fallback = <DefaultFallback />, require
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
-  if (requireAdmin && user?.role !== 'admin') {
+  if (requireAdmin && !['admin', 'manager'].includes(user?.role)) {
     return <Navigate to="/dashboard" replace />;
   }
 

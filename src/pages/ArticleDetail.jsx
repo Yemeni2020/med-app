@@ -11,6 +11,9 @@ import BookmarkButton from '@/components/shared/BookmarkButton';
 import { Skeleton } from '@/components/ui/skeleton';
 import ReactMarkdown from 'react-markdown';
 import { toast } from 'sonner';
+import ReviewSection from '@/components/reviews/ReviewSection';
+import RatingSummary from '@/components/reviews/RatingSummary';
+import Seo from '@/components/seo/Seo';
 
 export default function ArticleDetail() {
   const { t, lang, isRTL } = useLanguage();
@@ -147,6 +150,16 @@ export default function ArticleDetail() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+      <Seo
+        title={article.meta_title}
+        description={article.meta_description}
+        canonicalUrl={article.canonical_url}
+        keywords={article.meta_keywords}
+        robots={article.robots}
+        openGraph={article.open_graph}
+        twitter={article.twitter_card}
+        jsonLd={article.json_ld}
+      />
       <Link to="/articles">
         <Button variant="ghost" className="mb-8 gap-2 text-muted-foreground hover:text-foreground">
           <ArrowLeft className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
@@ -174,23 +187,24 @@ export default function ArticleDetail() {
 
           {/* Author + Meta */}
           <div className="flex items-center gap-4 mb-8 pb-8 border-b border-border">
-            <Link to={`/doctors?author=${encodeURIComponent(article.author_name)}`}>
+            <Link to={article.doctor_id ? `/doctors/${article.doctor_id}` : `/doctors?author=${encodeURIComponent(article.author_name)}`}>
               <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0 hover:ring-2 hover:ring-primary/30 transition-all cursor-pointer">
                 {article.author_avatar ? (
-                  <img src={article.author_avatar} alt="" className="w-full h-full rounded-full object-cover" />
+                  <img src={article.author_avatar} alt={article.author_avatar_alt || article.author_name} className="w-full h-full rounded-full object-cover" />
                 ) : (
                   <span className="text-primary font-bold text-lg">{article.author_name?.[0]}</span>
                 )}
               </div>
             </Link>
             <div>
-              <Link to={`/doctors?author=${encodeURIComponent(article.author_name)}`} className="font-semibold hover:text-primary transition-colors">
+              <Link to={article.doctor_id ? `/doctors/${article.doctor_id}` : `/doctors?author=${encodeURIComponent(article.author_name)}`} className="font-semibold hover:text-primary transition-colors">
                 {article.author_name}
               </Link>
               <div className="flex items-center gap-3 text-sm text-muted-foreground mt-0.5 flex-wrap">
                 {article.author_title && <span>{article.author_title}</span>}
                 <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {article.read_time_minutes || 5} {t.common.minRead}</span>
                 <span className="flex items-center gap-1"><Eye className="w-3.5 h-3.5" /> {article.views_count?.toLocaleString() || 0}</span>
+                <RatingSummary averageRating={article.average_rating} reviewCount={article.review_count} />
               </div>
             </div>
           </div>
@@ -198,7 +212,7 @@ export default function ArticleDetail() {
           {/* Cover Image */}
           {article.cover_image && (
             <div className="rounded-2xl overflow-hidden mb-10 shadow-md">
-              <img src={article.cover_image} alt={title} className="w-full aspect-[16/9] object-cover" />
+              <img src={article.cover_image} alt={article.cover_image_alt || title} className="w-full aspect-[16/9] object-cover" />
             </div>
           )}
 
@@ -253,7 +267,7 @@ export default function ArticleDetail() {
           <div className="mt-12 p-6 rounded-2xl bg-accent/40 border border-border flex gap-4 items-start">
             <div className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
               {article.author_avatar ? (
-                <img src={article.author_avatar} alt="" className="w-full h-full rounded-full object-cover" />
+                <img src={article.author_avatar} alt={article.author_avatar_alt || article.author_name} className="w-full h-full rounded-full object-cover" />
               ) : (
                 <span className="text-primary font-bold text-xl">{article.author_name?.[0]}</span>
               )}
@@ -262,13 +276,22 @@ export default function ArticleDetail() {
               <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">{t.articleDetail.writtenBy}</p>
               <p className="font-semibold text-lg">{article.author_name}</p>
               {article.author_title && <p className="text-muted-foreground text-sm mt-0.5">{article.author_title}</p>}
-              <Link to={`/doctors?author=${encodeURIComponent(article.author_name)}`}>
+              <Link to={article.doctor_id ? `/doctors/${article.doctor_id}` : `/doctors?author=${encodeURIComponent(article.author_name)}`}>
                 <Button variant="link" className="px-0 mt-1 h-auto text-primary text-sm gap-1">
                   <User className="w-3.5 h-3.5" /> {t.articleDetail.viewProfile}
                 </Button>
               </Link>
             </div>
           </div>
+
+          <ReviewSection
+            reviewableType="article"
+            reviewableId={article.id}
+            summary={{ average_rating: article.average_rating, review_count: article.review_count }}
+            onSummaryChange={(nextSummary) => {
+              queryClient.setQueryData(['article', articleId], (current) => current ? ({ ...current, ...nextSummary }) : current);
+            }}
+          />
         </article>
 
         {/* Sidebar */}
@@ -283,7 +306,7 @@ export default function ArticleDetail() {
                   return (
                     <Link key={a.id} to={`/articles/${a.id}`} className="flex gap-3 group">
                       {a.cover_image && (
-                        <img src={a.cover_image} alt="" className="w-16 h-16 rounded-lg object-cover flex-shrink-0" />
+                        <img src={a.cover_image} alt={a.cover_image_alt || t2} className="w-16 h-16 rounded-lg object-cover flex-shrink-0" />
                       )}
                       <div>
                         <p className="text-sm font-medium leading-snug group-hover:text-primary transition-colors line-clamp-2">{t2}</p>
@@ -305,7 +328,7 @@ export default function ArticleDetail() {
                 return (
                   <Link key={a.id} to={`/articles/${a.id}`} className="flex gap-3 group">
                     {a.cover_image && (
-                      <img src={a.cover_image} alt="" className="w-16 h-16 rounded-lg object-cover flex-shrink-0" />
+                      <img src={a.cover_image} alt={a.cover_image_alt || t2} className="w-16 h-16 rounded-lg object-cover flex-shrink-0" />
                     )}
                     <div>
                       <p className="text-sm font-medium leading-snug group-hover:text-primary transition-colors line-clamp-2">{t2}</p>

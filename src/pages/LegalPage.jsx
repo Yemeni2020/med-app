@@ -7,6 +7,7 @@ import { getMedSetting } from '@/lib/med-api';
 import { useLanguage } from '@/lib/LanguageContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import PageSeo from '@/components/seo/PageSeo';
 
 const PAGE_MAP = {
   '/policy': {
@@ -70,6 +71,7 @@ export default function LegalPage() {
 
   return (
     <div className="relative overflow-hidden">
+      <PageSeo page={pathname === '/privacy' ? 'privacy' : 'policy'} />
       <div className="absolute inset-x-0 top-0 h-72 bg-[radial-gradient(circle_at_top,_rgba(14,165,233,0.18),_transparent_55%),linear-gradient(180deg,rgba(45,212,191,0.16),transparent)]" />
       <div className="relative mx-auto max-w-5xl px-4 py-10 sm:px-6">
         <section className="mb-8 rounded-[2rem] border border-border/60 bg-card/90 p-8 shadow-[0_24px_80px_-40px_rgba(15,23,42,0.35)] backdrop-blur">

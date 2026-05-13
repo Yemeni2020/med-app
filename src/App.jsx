@@ -24,15 +24,18 @@ import ExpertQA from '@/pages/ExpertQA';
 import MedicalNews from '@/pages/MedicalNews';
 import Guidelines from '@/pages/Guidelines';
 import Doctors from '@/pages/Doctors';
+import DoctorDetail from '@/pages/DoctorDetail';
 import LegalPage from '@/pages/LegalPage';
 import SavedArticles from '@/pages/SavedArticles';
 import SymptomChecker from '@/pages/SymptomChecker';
 import HealthDashboard from '@/pages/HealthDashboard';
 import AdminKnowledgeBase from '@/pages/AdminKnowledgeBase';
+import AdminReviews from '@/pages/AdminReviews';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import UserProfile from '@/pages/UserProfile';
 import DoctorDashboard from '@/pages/DoctorDashboard';
+import PatientStoryDetail from '@/pages/PatientStoryDetail';
 
 const Router = import.meta.env.VITE_ROUTER_MODE === 'hash' ? HashRouter : BrowserRouter;
 
@@ -59,6 +62,8 @@ const AuthenticatedApp = () => {
         <Route path="/news" element={<MedicalNews />} />
         <Route path="/guidelines" element={<Guidelines />} />
         <Route path="/doctors" element={<Doctors />} />
+        <Route path="/doctors/:id" element={<DoctorDetail />} />
+        <Route path="/stories/:id" element={<PatientStoryDetail />} />
         <Route path="/policy" element={<LegalPage />} />
         <Route path="/privacy" element={<LegalPage />} />
         <Route path="/symptom-checker" element={<SymptomChecker />} />
@@ -72,6 +77,7 @@ const AuthenticatedApp = () => {
 
         <Route element={<ProtectedRoute requireAdmin />}>
           <Route path="/admin/knowledge-base" element={<AdminKnowledgeBase />} />
+          <Route path="/admin/reviews" element={<AdminReviews />} />
         </Route>
 
         <Route path="/login" element={<Login />} />

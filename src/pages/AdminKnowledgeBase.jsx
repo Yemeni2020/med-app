@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { useLanguage } from '@/lib/LanguageContext';
+import PageSeo from '@/components/seo/PageSeo';
 
 const PAGE_COPY = {
   en: {
@@ -213,6 +214,7 @@ export default function AdminKnowledgeBase() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
+      <PageSeo page="admin-knowledge-base" />
       <div className="flex items-center gap-4 mb-6">
         <Link to="/dashboard">
           <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground">

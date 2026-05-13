@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Stethoscope, Plus, X, Loader2, AlertTriangle, CheckCircle, Info, ShieldAlert, Brain, HeartPulse, ClipboardList, ArrowRight, TimerReset, ActivitySquare } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ErrorState from '@/components/state/ErrorState';
+import PageSeo from '@/components/seo/PageSeo';
 
 const COMMON_SYMPTOMS = [
   'Headache', 'Fever', 'Fatigue', 'Cough', 'Shortness of breath',
@@ -157,6 +158,7 @@ export default function SymptomChecker() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10">
+      <PageSeo page="symptom-checker" />
       <div className="flex items-center gap-3 mb-2">
         <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
           <Stethoscope className="w-5 h-5 text-primary" />

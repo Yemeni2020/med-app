@@ -29,7 +29,7 @@ export default function ArticleCard({ article, variant = 'default' }) {
             <div className="aspect-[16/9] md:aspect-[21/9] overflow-hidden">
               <img
                 src={article.cover_image || 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200'}
-                alt={title}
+                alt={article.cover_image_alt || title}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
@@ -72,7 +72,7 @@ export default function ArticleCard({ article, variant = 'default' }) {
           <div className="aspect-[16/10] overflow-hidden">
             <img
               src={article.cover_image || 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=600'}
-              alt={title}
+              alt={article.cover_image_alt || title}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
           </div>

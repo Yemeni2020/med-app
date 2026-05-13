@@ -9,6 +9,7 @@ import { Calendar, Video, MessageSquare } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
+import PageSeo from '@/components/seo/PageSeo';
 
 const statusStyles = {
   upcoming: 'bg-primary/10 text-primary',
@@ -67,7 +68,7 @@ export default function ExpertQA() {
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
               {session.expert_avatar ? (
-                <img src={session.expert_avatar} alt="" className="w-full h-full rounded-full object-cover" />
+                <img src={session.expert_avatar} alt={session.expert_name} className="w-full h-full rounded-full object-cover" />
               ) : (
                 <span className="text-primary font-bold text-sm">{session.expert_name?.[0]}</span>
               )}
@@ -94,6 +95,7 @@ export default function ExpertQA() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+      <PageSeo page="qa" />
       <div className="mb-10">
         <h1 className="text-3xl md:text-4xl font-serif font-bold mb-2">{t.qa.title}</h1>
         <p className="text-muted-foreground">{t.qa.subtitle}</p>

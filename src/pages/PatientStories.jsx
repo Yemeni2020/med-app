@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/lib/LanguageContext';
 import { useAuth } from '@/lib/AuthContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -16,6 +16,8 @@ import { Heart, Plus, Quote, User } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
+import RatingSummary from '@/components/reviews/RatingSummary';
+import PageSeo from '@/components/seo/PageSeo';
 
 export default function PatientStories() {
   const { t, lang } = useLanguage();
@@ -60,6 +62,7 @@ export default function PatientStories() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+      <PageSeo page="patient-stories" />
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-10">
         <div>
           <h1 className="text-3xl md:text-4xl font-serif font-bold mb-2">{t.stories.title}</h1>
@@ -124,6 +127,7 @@ export default function PatientStories() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
             >
+              <Link to={`/stories/${story.id}`} className="block h-full">
               <Card className="h-full hover:shadow-lg transition-shadow">
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
@@ -143,9 +147,13 @@ export default function PatientStories() {
                     <span className="text-sm font-medium">
                       {story.is_anonymous ? t.common.anonymous : (story.display_name || t.common.anonymous)}
                     </span>
+                    <div className="ml-auto">
+                      <RatingSummary averageRating={story.average_rating} reviewCount={story.review_count} />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
+              </Link>
             </motion.div>
           ))}
         </div>

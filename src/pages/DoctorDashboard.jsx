@@ -16,6 +16,7 @@ import EmptyState from '@/components/state/EmptyState';
 import ErrorState from '@/components/state/ErrorState';
 import { countryDialCodes } from '@/data/countryDialCodes';
 import { buildPhoneValue, parsePhoneValue } from '@/lib/phone';
+import PageSeo from '@/components/seo/PageSeo';
 
 const displayNames = {
   en: typeof Intl !== 'undefined' ? new Intl.DisplayNames(['en'], { type: 'region' }) : null,
@@ -214,6 +215,7 @@ export default function DoctorDashboard() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+      <PageSeo page="doctor-dashboard" />
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4 border-b border-border pb-6">
         <div>
           <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-primary">{copy.eyebrow}</p>

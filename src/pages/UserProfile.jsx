@@ -17,6 +17,7 @@ import {
   Bell, Eye,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import PageSeo from '@/components/seo/PageSeo';
 
 const METRIC_META = {
   weight: { label: 'Weight', unit: 'kg', color: '#0ea5e9' },
@@ -94,6 +95,7 @@ export default function UserProfile() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+      <PageSeo page="profile" />
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
         className="bg-card border border-border rounded-3xl overflow-hidden mb-6 shadow-sm">
         <div className="h-32 bg-gradient-to-r from-primary via-primary/80 to-secondary relative">

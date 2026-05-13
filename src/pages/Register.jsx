@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { countryDialCodes } from '@/data/countryDialCodes';
+import PageSeo from '@/components/seo/PageSeo';
 
 export default function Register() {
   const navigate = useNavigate();
@@ -69,6 +70,7 @@ export default function Register() {
 
   return (
     <div className="mx-auto flex min-h-[calc(100vh-10rem)] max-w-2xl items-center px-4 py-10">
+      <PageSeo page="register" />
       <Card className="w-full rounded-3xl border-border/70 shadow-lg">
         <CardHeader className="space-y-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">

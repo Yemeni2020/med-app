@@ -8,6 +8,7 @@ import { ExternalLink, Zap, Clock, Newspaper } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
+import PageSeo from '@/components/seo/PageSeo';
 
 const newsCategoryColors = {
   breakthrough: 'bg-purple-100 text-purple-700',
@@ -43,6 +44,7 @@ export default function MedicalNews() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+      <PageSeo page="news" />
       <div className="mb-10">
         <h1 className="text-3xl md:text-4xl font-serif font-bold mb-2">{t.news.title}</h1>
         <p className="text-muted-foreground">{t.news.subtitle}</p>
@@ -84,7 +86,7 @@ export default function MedicalNews() {
                   <div className="flex flex-col sm:flex-row gap-5">
                     {item.cover_image && (
                       <div className="sm:w-40 h-28 rounded-xl overflow-hidden shrink-0">
-                        <img src={item.cover_image} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                        <img src={item.cover_image} alt={lang === 'ar' && item.title_ar ? item.title_ar : item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
