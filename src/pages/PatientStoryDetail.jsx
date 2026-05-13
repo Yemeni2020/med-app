@@ -89,12 +89,14 @@ export default function PatientStoryDetail() {
         </div>
       </article>
 
-      <ReviewSection
-        reviewableType="patient_story"
-        reviewableId={story.id}
-        summary={resolvedSummary}
-        onSummaryChange={setSummary}
-      />
+      <div data-tour="review-section">
+        <ReviewSection
+          reviewableType="patient_story"
+          reviewableId={story.id}
+          summary={resolvedSummary}
+          onSummaryChange={setSummary}
+        />
+      </div>
     </div>
   );
 }

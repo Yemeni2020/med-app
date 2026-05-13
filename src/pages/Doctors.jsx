@@ -159,7 +159,7 @@ export default function Doctors() {
       <div className="mb-10">
         <h1 className="text-3xl md:text-4xl font-serif font-bold mb-2">{t.doctors.title}</h1>
         <p className="text-muted-foreground text-lg mb-6">{t.doctors.subtitle}</p>
-        <div className="relative max-w-md">
+        <div data-tour="doctors-section" className="relative max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           <Input
             value={search}

@@ -1,0 +1,79 @@
+.driver-popover.med-tour-popover {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 20px;
+  box-shadow: 0 24px 64px rgba(15, 23, 42, 0.22);
+  max-width: 360px;
+  color: #0f172a;
+}
+
+.dark .driver-popover.med-tour-popover {
+  background: #0f172a;
+  color: #f8fafc;
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+.med-tour-popover .driver-popover-title {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.med-tour-popover .driver-popover-description {
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.med-tour-popover .driver-popover-footer {
+  margin-top: 1rem;
+  gap: 0.75rem;
+}
+
+.med-tour-popover .driver-popover-footer .driver-popover-progress-text {
+  color: #64748b;
+  font-size: 0.78rem;
+}
+
+.dark .med-tour-popover .driver-popover-footer .driver-popover-progress-text {
+  color: #cbd5e1;
+}
+
+.med-tour-popover .driver-popover-footer button {
+  border-radius: 9999px;
+  min-height: 2.25rem;
+  padding-inline: 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.med-tour-popover .driver-popover-next-btn,
+.med-tour-popover .driver-popover-close-btn {
+  background: #0f766e;
+  border-color: #0f766e;
+  color: #ffffff;
+  text-shadow: none;
+}
+
+.med-tour-popover .driver-popover-prev-btn {
+  background: transparent;
+  border-color: rgba(15, 23, 42, 0.12);
+  color: #0f172a;
+  text-shadow: none;
+}
+
+.dark .med-tour-popover .driver-popover-prev-btn {
+  border-color: rgba(226, 232, 240, 0.2);
+  color: #f8fafc;
+}
+
+.med-tour-skip-btn {
+  background: transparent;
+  border: 0;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.25rem 0.4rem;
+}
+
+.dark .med-tour-skip-btn {
+  color: #cbd5e1;
+}

@@ -630,6 +630,7 @@ export default function MedicalAssistant() {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             onClick={() => setOpen(true)}
+            data-tour="medical-assistant"
             className={`fixed bottom-24 z-50 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-secondary text-white shadow-2xl shadow-primary/30 transition-transform duration-200 hover:scale-110 md:bottom-6 ${isRTL ? 'left-4 md:left-6' : 'right-4 md:right-6'}`}
           >
             <Stethoscope className="relative z-10 h-6 w-6" />

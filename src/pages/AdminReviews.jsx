@@ -69,7 +69,7 @@ export default function AdminReviews() {
   };
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
+    <div data-tour="admin-reviews" className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
       <PageSeo page="admin-reviews" fallback={{ meta_title: 'Review moderation', meta_description: 'Moderate user reviews.', canonical_url: `${window.location.origin}/admin/reviews`, robots: 'noindex,nofollow' }} />
 
       <Link to="/dashboard" className="mb-8 inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
@@ -104,7 +104,7 @@ export default function AdminReviews() {
         onRetry={refetch}
         showModeration
         renderActions={(review) => (
-          <>
+          <div data-tour="admin-review-actions" className="flex flex-wrap gap-2">
             {review.status !== 'approved' ? (
               <Button
                 size="sm"
@@ -135,7 +135,7 @@ export default function AdminReviews() {
             >
               {lang === 'ar' ? 'حذف' : 'Delete'}
             </Button>
-          </>
+          </div>
         )}
       />
     </div>

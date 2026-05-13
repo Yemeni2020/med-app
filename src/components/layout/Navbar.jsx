@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import UserAvatar from '@/components/profile/UserAvatar';
+import TourButton from '@/components/tour/TourButton';
 
 export default function Navbar() {
   const { lang, toggleLang, isRTL, t } = useLanguage();
@@ -67,7 +68,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16 gap-4">
 
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 md:gap-2.5 shrink-0">
+          <Link to="/" data-tour="navbar-logo" className="flex items-center gap-2 md:gap-2.5 shrink-0">
             <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center shadow-sm">
               <Stethoscope className="w-4 h-4 text-white" />
             </div>
@@ -160,11 +161,14 @@ export default function Navbar() {
 
             <button
               onClick={toggleLang}
+              data-tour="language-switcher"
               className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all border border-transparent hover:border-border"
             >
               <Globe className="w-3.5 h-3.5" />
               {lang === 'en' ? 'عربي' : 'EN'}
             </button>
+
+            <TourButton className="hidden md:inline-flex" />
 
             {isAuthenticated ? (
               <div className="relative hidden md:block" ref={accountRef}>
@@ -216,6 +220,7 @@ export default function Navbar() {
                       />
                       <DesktopAccountLink
                         to="/saved"
+                        dataTour="saved-items"
                         label={t.nav.saved}
                         active={isActive('/saved')}
                         onNavigate={() => setAccountOpen(false)}
@@ -229,6 +234,7 @@ export default function Navbar() {
                         <>
                           <DesktopAccountLink
                             to="/admin/knowledge-base"
+                            dataTour="knowledge-base"
                             label="Knowledge Base"
                             active={isActive('/admin/knowledge-base')}
                             onNavigate={() => setAccountOpen(false)}
@@ -236,6 +242,7 @@ export default function Navbar() {
                           />
                           <DesktopAccountLink
                             to="/admin/reviews"
+                            dataTour="admin-reviews"
                             label={lang === 'ar' ? 'إدارة المراجعات' : 'Review Moderation'}
                             active={isActive('/admin/reviews')}
                             onNavigate={() => setAccountOpen(false)}
@@ -246,6 +253,7 @@ export default function Navbar() {
 
                       <DesktopAccountLink
                         to="/doctor-dashboard"
+                        dataTour="doctor-dashboard"
                         label={t.nav.doctorDashboard}
                         active={isActive('/doctor-dashboard')}
                         onNavigate={() => setAccountOpen(false)}
@@ -264,7 +272,7 @@ export default function Navbar() {
                 </AnimatePresence>
               </div>
             ) : (
-              <Link to="/login">
+              <Link to="/login" data-tour="login-register-action">
                 <Button variant="outline" size="sm" className="hidden md:inline-flex rounded-full">
                   <LogIn className="w-4 h-4 mr-2" />
                   {lang === 'ar' ? 'تسجيل الدخول' : 'Sign In'}
@@ -299,12 +307,14 @@ export default function Navbar() {
                     </button>
                     <button
                       onClick={toggleLang}
+                      data-tour="language-switcher"
                       className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-border px-3 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all"
                     >
                       <Globe className="w-4 h-4" />
                       {lang === 'en' ? 'عربي' : 'EN'}
                     </button>
                   </div>
+                  <TourButton className="mb-2 w-full justify-center" onClick={() => setMobileOpen(false)} />
                   {allLinks.map(link => (
                     <Link
                       key={link.to}
@@ -322,20 +332,20 @@ export default function Navbar() {
                   <div className="border-t border-border my-2" />
                   {isAuthenticated ? (
                     <>
-                      <Link to="/profile" onClick={() => setMobileOpen(false)} className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive('/profile') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}>
+                      <Link to="/profile" data-tour="profile-page" onClick={() => setMobileOpen(false)} className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive('/profile') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}>
                         <UserAvatar size="sm" linkTo={null} /> {getDisplayName(user)}
                       </Link>
                       {['admin', 'manager'].includes(user?.role) ? (
                         <>
-                          <Link to="/admin/knowledge-base" onClick={() => setMobileOpen(false)} className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive('/admin/knowledge-base') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}>
+                          <Link to="/admin/knowledge-base" data-tour="knowledge-base" onClick={() => setMobileOpen(false)} className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive('/admin/knowledge-base') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}>
                             <ShieldCheck className="w-4 h-4" /> Knowledge Base
                           </Link>
-                          <Link to="/admin/reviews" onClick={() => setMobileOpen(false)} className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive('/admin/reviews') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}>
+                          <Link to="/admin/reviews" data-tour="admin-reviews" onClick={() => setMobileOpen(false)} className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive('/admin/reviews') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}>
                             <ShieldCheck className="w-4 h-4" /> {lang === 'ar' ? 'إدارة المراجعات' : 'Review Moderation'}
                           </Link>
                         </>
                       ) : null}
-                      <Link to="/doctor-dashboard" onClick={() => setMobileOpen(false)} className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive('/doctor-dashboard') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}>
+                      <Link to="/doctor-dashboard" data-tour="doctor-dashboard" onClick={() => setMobileOpen(false)} className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive('/doctor-dashboard') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}>
                         <FilePenLine className="w-4 h-4" /> {t.nav.doctorDashboard}
                       </Link>
                       <button onClick={handleLogout} className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium transition-all text-muted-foreground hover:text-foreground hover:bg-muted/50">
@@ -343,14 +353,14 @@ export default function Navbar() {
                       </button>
                     </>
                   ) : (
-                    <Link to="/login" onClick={() => setMobileOpen(false)} className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive('/login') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}>
+                    <Link to="/login" data-tour="login-register-action" onClick={() => setMobileOpen(false)} className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive('/login') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}>
                       <LogIn className="w-4 h-4" /> {lang === 'ar' ? 'تسجيل الدخول' : 'Sign In'}
                     </Link>
                   )}
-                  <Link to="/dashboard" onClick={() => setMobileOpen(false)} className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive('/dashboard') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}>
+                  <Link to="/dashboard" data-tour="health-dashboard" onClick={() => setMobileOpen(false)} className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive('/dashboard') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}>
                     <LayoutDashboard className="w-4 h-4" /> {t.nav.dashboard}
                   </Link>
-                  <Link to="/saved" onClick={() => setMobileOpen(false)} className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive('/saved') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}>
+                  <Link to="/saved" data-tour="saved-items" onClick={() => setMobileOpen(false)} className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive('/saved') ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}>
                     <Bookmark className="w-4 h-4" /> {t.nav.saved}
                     {savedItems.length > 0 && <span className="ml-auto bg-primary/10 text-primary text-xs font-bold px-2 py-0.5 rounded-full">{savedItems.length}</span>}
                   </Link>
@@ -370,10 +380,11 @@ function getDisplayName(user) {
   return user.name.en || user.name.ar || 'Profile';
 }
 
-function DesktopAccountLink({ to, label, active, icon, badge = null, onNavigate }) {
+function DesktopAccountLink({ to, label, active, icon, badge = null, onNavigate, dataTour = null }) {
   return (
     <Link
       to={to}
+      data-tour={dataTour}
       onClick={onNavigate}
       className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
         active ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'

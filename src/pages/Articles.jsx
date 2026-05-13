@@ -106,7 +106,7 @@ export default function Articles() {
         <h1 className="text-3xl md:text-4xl font-serif font-bold mb-6">{t.nav.articles}</h1>
 
         {/* Search bar */}
-        <div className="relative max-w-xl group">
+        <div data-tour="article-search" className="relative max-w-xl group">
           <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-2xl blur-lg opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 -z-10" />
           <div className="flex items-center bg-card border border-border rounded-2xl shadow-sm hover:shadow-md focus-within:shadow-md focus-within:border-primary/50 transition-all duration-200 overflow-hidden h-14 px-4 gap-3">
             <Search className="w-5 h-5 text-muted-foreground shrink-0" />

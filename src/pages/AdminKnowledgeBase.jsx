@@ -213,7 +213,7 @@ export default function AdminKnowledgeBase() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
+    <div data-tour="knowledge-base" className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
       <PageSeo page="admin-knowledge-base" />
       <div className="flex items-center gap-4 mb-6">
         <Link to="/dashboard">
@@ -241,7 +241,7 @@ export default function AdminKnowledgeBase() {
           className="hidden"
           onChange={handleFileImport}
         />
-        <Button variant="outline" className="gap-2 rounded-xl" onClick={() => fileInputRef.current?.click()}>
+        <Button data-tour="seo-content-link" variant="outline" className="gap-2 rounded-xl" onClick={() => fileInputRef.current?.click()}>
           <Upload className="w-4 h-4" /> {copy.importJson}
         </Button>
       </div>
