@@ -14,7 +14,6 @@ import AppLayout from '@/components/layout/AppLayout';
 import CookieConsentBanner from '@/components/layout/CookieConsentBanner';
 import ConsentTrackers from '@/components/layout/ConsentTrackers';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import { UserTourProvider } from '@/components/tour/UserTourProvider';
 
 import Home from '@/pages/Home';
 import Articles from '@/pages/Articles';
@@ -101,9 +100,7 @@ function App() {
               <CookieConsentProvider>
                 <SavedArticlesProvider>
                   <Router>
-                    <UserTourProvider>
-                      <AuthenticatedApp />
-                    </UserTourProvider>
+                    <AuthenticatedApp />
                   </Router>
                 </SavedArticlesProvider>
                 <ConsentTrackers />

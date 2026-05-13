@@ -15,7 +15,7 @@ export default function SavedArticles() {
   const typeLabel = t.savedPage.itemTypes;
 
   return (
-    <div data-tour="saved-items" className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
       <PageSeo page="saved" />
       <div className="flex items-center gap-4 mb-2">
         <Link to="/">

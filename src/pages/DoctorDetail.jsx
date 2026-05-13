@@ -133,14 +133,12 @@ export default function DoctorDetail() {
         </div>
       </section>
 
-      <div data-tour="review-section">
-        <ReviewSection
-          reviewableType="doctor"
-          reviewableId={doctor.id}
-          summary={resolvedSummary}
-          onSummaryChange={setSummary}
-        />
-      </div>
+      <ReviewSection
+        reviewableType="doctor"
+        reviewableId={doctor.id}
+        summary={resolvedSummary}
+        onSummaryChange={setSummary}
+      />
     </div>
   );
 }

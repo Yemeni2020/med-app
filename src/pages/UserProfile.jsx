@@ -94,7 +94,7 @@ export default function UserProfile() {
   ];
 
   return (
-    <div data-tour="profile-page" className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
       <PageSeo page="profile" />
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
         className="bg-card border border-border rounded-3xl overflow-hidden mb-6 shadow-sm">

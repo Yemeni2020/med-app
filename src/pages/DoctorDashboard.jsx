@@ -214,7 +214,7 @@ export default function DoctorDashboard() {
   }
 
   return (
-    <div data-tour="doctor-dashboard" className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
       <PageSeo page="doctor-dashboard" />
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4 border-b border-border pb-6">
         <div>
@@ -229,7 +229,7 @@ export default function DoctorDashboard() {
 
       {isApprovedDoctor ? (
         <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-          <section data-tour="doctor-submit-article" className="rounded-2xl border border-border bg-card p-5">
+          <section className="rounded-2xl border border-border bg-card p-5">
             <div className="mb-5 flex items-center gap-2">
               <FileText className="h-5 w-5 text-primary" />
               <h2 className="text-lg font-semibold">{copy.createArticle}</h2>
@@ -297,7 +297,7 @@ export default function DoctorDashboard() {
             </form>
           </section>
 
-          <section data-tour="doctor-review-status" className="rounded-2xl border border-border bg-card p-5">
+          <section className="rounded-2xl border border-border bg-card p-5">
             <h2 className="mb-4 text-lg font-semibold">{copy.myArticles}</h2>
             {isLoadingArticles ? (
               <div className="space-y-3">

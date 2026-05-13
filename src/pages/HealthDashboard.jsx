@@ -53,7 +53,7 @@ export default function HealthDashboard() {
   });
 
   return (
-    <div data-tour="health-dashboard" className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
       <PageSeo page="dashboard" />
       {/* Header */}
       <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
@@ -66,7 +66,7 @@ export default function HealthDashboard() {
             <p className="text-sm text-muted-foreground">{t.dashboard.subtitle}</p>
           </div>
         </div>
-        <Button data-tour="health-metric-entry" onClick={() => setShowAddModal(true)} className="gap-2 rounded-xl">
+        <Button onClick={() => setShowAddModal(true)} className="gap-2 rounded-xl">
           <Plus className="w-4 h-4" /> {t.dashboard.logMetric}
         </Button>
       </div>

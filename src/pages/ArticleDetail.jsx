@@ -284,16 +284,14 @@ export default function ArticleDetail() {
             </div>
           </div>
 
-          <div data-tour="review-section">
-            <ReviewSection
-              reviewableType="article"
-              reviewableId={article.id}
-              summary={{ average_rating: article.average_rating, review_count: article.review_count }}
-              onSummaryChange={(nextSummary) => {
-                queryClient.setQueryData(['article', articleId], (current) => current ? ({ ...current, ...nextSummary }) : current);
-              }}
-            />
-          </div>
+          <ReviewSection
+            reviewableType="article"
+            reviewableId={article.id}
+            summary={{ average_rating: article.average_rating, review_count: article.review_count }}
+            onSummaryChange={(nextSummary) => {
+              queryClient.setQueryData(['article', articleId], (current) => current ? ({ ...current, ...nextSummary }) : current);
+            }}
+          />
         </article>
 
         {/* Sidebar */}
