@@ -53,9 +53,18 @@ const PAGE_COPY = {
     approvedSources: 'Approved custom sources',
     staleSources: 'Stale custom sources',
     feedbackTitle: 'Assistant feedback',
+    launchMonitor: 'Launch monitoring',
+    launchMonitorText: 'Review urgent cases, safety complaints, and low-rated answers every day during the first release window.',
     interactions: 'Logged interactions',
     positiveFeedback: 'Positive feedback',
     negativeFeedback: 'Negative feedback',
+    urgentCases: 'Urgent or emergency cases',
+    pendingReview: 'Pending review',
+    answerPreview: 'Answer preview',
+    model: 'Model',
+    createdAt: 'Created at',
+    releaseChecklist: 'Clinician review package',
+    releaseChecklistText: 'Use the repo review packet before public launch and document named clinician sign-off for seeded sources.',
     importSuccess: 'Knowledge sources imported.',
     saveSuccess: 'Knowledge source saved.',
     deleteSuccess: 'Knowledge source deleted.',
@@ -99,9 +108,18 @@ const PAGE_COPY = {
     approvedSources: 'المصادر المخصصة المعتمدة',
     staleSources: 'المصادر المخصصة القديمة',
     feedbackTitle: 'تقييمات المساعد',
+    launchMonitor: 'مراقبة الإطلاق',
+    launchMonitorText: 'راجع الحالات العاجلة وشكاوى السلامة والردود منخفضة التقييم يوميًا خلال نافذة الإطلاق الأولى.',
     interactions: 'المحادثات المسجلة',
     positiveFeedback: 'التقييمات الإيجابية',
     negativeFeedback: 'التقييمات السلبية',
+    urgentCases: 'الحالات العاجلة أو الطارئة',
+    pendingReview: 'بانتظار المراجعة',
+    answerPreview: 'معاينة الرد',
+    model: 'النموذج',
+    createdAt: 'وقت الإنشاء',
+    releaseChecklist: 'حزمة المراجعة السريرية',
+    releaseChecklistText: 'استخدم حزمة المراجعة داخل المستودع قبل الإطلاق العام ووثّق اعتماد طبيب أو مراجع سريري مسمّى للمصادر المزروعة.',
     importSuccess: 'تم استيراد المصادر المعرفية.',
     saveSuccess: 'تم حفظ المصدر المعرفي.',
     deleteSuccess: 'تم حذف المصدر المعرفي.',
@@ -334,6 +352,34 @@ export default function AdminKnowledgeBase() {
             <p className="text-2xl font-bold text-foreground">{analyticsTotals.negative || 0}</p>
           </CardContent>
         </Card>
+        <Card className="rounded-2xl">
+          <CardHeader>
+            <CardTitle>{copy.launchMonitor}</CardTitle>
+            <CardDescription>{copy.urgentCases}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold text-amber-600">{analyticsTotals.urgent_or_emergency || 0}</p>
+          </CardContent>
+        </Card>
+        <Card className="rounded-2xl">
+          <CardHeader>
+            <CardTitle>{copy.launchMonitor}</CardTitle>
+            <CardDescription>{copy.pendingReview}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold text-primary">{analyticsTotals.pending_review || 0}</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 mb-8">
+        <div className="flex items-start gap-2">
+          <Clock3 className="w-4 h-4 mt-0.5 shrink-0" />
+          <div className="space-y-2">
+            <p>{copy.launchMonitorText}</p>
+            <p className="text-xs">{copy.releaseChecklistText}</p>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-[1.15fr_0.85fr] gap-6">
@@ -508,6 +554,12 @@ export default function AdminKnowledgeBase() {
                     <p className="text-sm font-medium text-foreground line-clamp-2">{entry.request?.message}</p>
                     <p className="text-xs text-muted-foreground">
                       {entry.response?.assessment?.urgency || 'unknown'} · {entry.response?.assessment?.specialty || 'general'}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {copy.model}: {entry.response?.model || 'unknown'} · {copy.createdAt}: {entry.createdAt || '—'}
+                    </p>
+                    <p className="text-xs text-muted-foreground line-clamp-3">
+                      {copy.answerPreview}: {entry.response?.answerPreview || '—'}
                     </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0 text-xs">

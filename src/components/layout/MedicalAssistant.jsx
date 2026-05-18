@@ -43,7 +43,7 @@ const CONTENT = {
       'When should I seek care for chest pain?',
     ],
     placeholder: 'Ask a medical question...',
-    disclaimer: 'General information only · Not a substitute for a licensed clinician',
+    disclaimer: 'AI case-analysis support only · Not a diagnosis or substitute for a licensed clinician',
     reset: 'Reset chat',
     contactTitle: 'Contact a Doctor',
     contactSubtitle: 'Prefer a human medical professional?',
@@ -53,14 +53,22 @@ const CONTENT = {
     backToChat: 'Back to chat',
     sourceLabel: 'Source details',
     intakeLabel: 'Symptom intake',
-    intakeSubtitle: 'Optional. Adds clinical context before you ask.',
-    askWithIntake: 'Use symptom intake',
+    intakeSubtitle: 'Optional. Adds case details and medical history before you ask.',
+    askWithIntake: 'Use case intake',
+    mainConcern: 'Main concern',
     ageGroup: 'Age group',
+    sex: 'Sex',
     duration: 'Duration',
     severity: 'Severity',
     fever: 'Fever',
     pregnancy: 'Pregnancy',
     chronicConditions: 'Chronic conditions',
+    medicalHistory: 'Past medical history',
+    currentMedications: 'Current medications',
+    allergies: 'Allergies',
+    surgeries: 'Surgeries',
+    homeReadings: 'Home readings',
+    recentExposure: 'Recent exposure',
     none: 'Not specified',
     followUp: 'Suggested follow-up',
     action: 'Recommended action',
@@ -70,6 +78,7 @@ const CONTENT = {
     sourceReviewedBy: 'Reviewer',
     unavailable: 'The medical assistant is temporarily unavailable. Please try again shortly.',
     ageGroupOptions: ['Adult', 'Child', 'Older adult'],
+    sexOptions: ['Female', 'Male', 'Other'],
     durationOptions: ['Less than 24 hours', '1 to 3 days', 'More than 3 days'],
     severityOptions: ['Mild', 'Moderate', 'Severe'],
     binaryOptions: ['No', 'Yes'],
@@ -87,7 +96,7 @@ const CONTENT = {
       'متى يجب طلب الرعاية بسبب ألم الصدر؟',
     ],
     placeholder: 'اطرح سؤالاً طبياً...',
-    disclaimer: 'معلومات عامة فقط · لا تغني عن مراجعة مختص مرخّص',
+    disclaimer: 'دعم لتحليل الحالة بالذكاء الاصطناعي فقط · ليس تشخيصًا ولا يغني عن المختص المرخّص',
     reset: 'إعادة المحادثة',
     contactTitle: 'تواصل مع طبيب',
     contactSubtitle: 'هل تفضل التحدث مع متخصص بشري؟',
@@ -97,14 +106,22 @@ const CONTENT = {
     backToChat: 'العودة للمحادثة',
     sourceLabel: 'تفاصيل المصدر',
     intakeLabel: 'نموذج الأعراض',
-    intakeSubtitle: 'اختياري. يضيف سياقًا سريريًا قبل السؤال.',
-    askWithIntake: 'استخدم نموذج الأعراض',
+    intakeSubtitle: 'اختياري. يضيف تفاصيل الحالة والتاريخ الطبي قبل السؤال.',
+    askWithIntake: 'استخدم نموذج الحالة',
+    mainConcern: 'الشكوى الرئيسية',
     ageGroup: 'الفئة العمرية',
+    sex: 'الجنس',
     duration: 'المدة',
     severity: 'الشدة',
     fever: 'الحرارة',
     pregnancy: 'الحمل',
     chronicConditions: 'أمراض مزمنة',
+    medicalHistory: 'التاريخ الطبي السابق',
+    currentMedications: 'الأدوية الحالية',
+    allergies: 'الحساسية',
+    surgeries: 'عمليات سابقة',
+    homeReadings: 'قياسات منزلية',
+    recentExposure: 'تعرض حديث',
     none: 'غير محدد',
     followUp: 'سؤال متابعة مقترح',
     action: 'الإجراء الموصى به',
@@ -114,6 +131,7 @@ const CONTENT = {
     sourceReviewedBy: 'المراجع',
     unavailable: 'المساعد الطبي غير متاح مؤقتًا. حاول مرة أخرى بعد قليل.',
     ageGroupOptions: ['بالغ', 'طفل', 'كبير سن'],
+    sexOptions: ['أنثى', 'ذكر', 'آخر'],
     durationOptions: ['أقل من 24 ساعة', 'من يوم إلى 3 أيام', 'أكثر من 3 أيام'],
     severityOptions: ['خفيفة', 'متوسطة', 'شديدة'],
     binaryOptions: ['لا', 'نعم'],
@@ -121,12 +139,20 @@ const CONTENT = {
 };
 
 const INITIAL_INTAKE = {
+  mainConcern: '',
   ageGroup: '',
+  sex: '',
   duration: '',
   severity: '',
   fever: '',
   pregnancy: '',
   chronicConditions: '',
+  medicalHistory: '',
+  currentMedications: '',
+  allergies: '',
+  surgeries: '',
+  homeReadings: '',
+  recentExposure: '',
 };
 
 const URGENCY_META = {
@@ -385,6 +411,16 @@ function IntakePanel({ open, setOpen, intake, setIntake, copy, isRTL, lang }) {
 
       {open ? (
         <div className="grid grid-cols-2 gap-2 rounded-2xl border border-border/70 bg-card p-3 shadow-sm">
+          <label className="col-span-2 space-y-1 text-[11px] text-muted-foreground">
+            <span>{copy.mainConcern}</span>
+            <input
+              value={intake.mainConcern}
+              onChange={(event) => setField('mainConcern', event.target.value)}
+              className="h-10 w-full rounded-xl border border-border bg-background px-3 text-xs text-foreground outline-none transition-colors focus:border-primary"
+              placeholder={lang === 'ar' ? 'مثال: صداع مع حرارة منذ يومين' : 'Example: headache with fever for 2 days'}
+            />
+          </label>
+
           <label className="space-y-1 text-[11px] text-muted-foreground">
             <span>{copy.ageGroup}</span>
             <select
@@ -394,6 +430,18 @@ function IntakePanel({ open, setOpen, intake, setIntake, copy, isRTL, lang }) {
             >
               <option value="">{copy.none}</option>
               {copy.ageGroupOptions.map((option) => <option key={option} value={option}>{option}</option>)}
+            </select>
+          </label>
+
+          <label className="space-y-1 text-[11px] text-muted-foreground">
+            <span>{copy.sex}</span>
+            <select
+              value={intake.sex}
+              onChange={(event) => setField('sex', event.target.value)}
+              className="h-10 w-full rounded-xl border border-border bg-background px-3 text-xs text-foreground outline-none transition-colors focus:border-primary"
+            >
+              <option value="">{copy.none}</option>
+              {copy.sexOptions.map((option) => <option key={option} value={option}>{option}</option>)}
             </select>
           </label>
 
@@ -452,6 +500,66 @@ function IntakePanel({ open, setOpen, intake, setIntake, copy, isRTL, lang }) {
               onChange={(event) => setField('chronicConditions', event.target.value)}
               className="h-10 w-full rounded-xl border border-border bg-background px-3 text-xs text-foreground outline-none transition-colors focus:border-primary"
               placeholder={lang === 'ar' ? 'مثال: سكري، ربو' : 'Example: diabetes, asthma'}
+            />
+          </label>
+
+          <label className="col-span-2 space-y-1 text-[11px] text-muted-foreground">
+            <span>{copy.medicalHistory}</span>
+            <textarea
+              value={intake.medicalHistory}
+              onChange={(event) => setField('medicalHistory', event.target.value)}
+              className="min-h-20 w-full rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground outline-none transition-colors focus:border-primary"
+              placeholder={lang === 'ar' ? 'أمراض سابقة مهمة أو دخول مستشفى' : 'Important past illnesses or hospitalizations'}
+            />
+          </label>
+
+          <label className="col-span-2 space-y-1 text-[11px] text-muted-foreground">
+            <span>{copy.currentMedications}</span>
+            <textarea
+              value={intake.currentMedications}
+              onChange={(event) => setField('currentMedications', event.target.value)}
+              className="min-h-20 w-full rounded-xl border border-border bg-background px-3 py-2 text-xs text-foreground outline-none transition-colors focus:border-primary"
+              placeholder={lang === 'ar' ? 'مثال: باراسيتامول، إنسولين، ضغط' : 'Example: paracetamol, insulin, blood pressure medicine'}
+            />
+          </label>
+
+          <label className="col-span-2 space-y-1 text-[11px] text-muted-foreground">
+            <span>{copy.allergies}</span>
+            <input
+              value={intake.allergies}
+              onChange={(event) => setField('allergies', event.target.value)}
+              className="h-10 w-full rounded-xl border border-border bg-background px-3 text-xs text-foreground outline-none transition-colors focus:border-primary"
+              placeholder={lang === 'ar' ? 'مثال: بنسلين، طعام بحري' : 'Example: penicillin, shellfish'}
+            />
+          </label>
+
+          <label className="col-span-2 space-y-1 text-[11px] text-muted-foreground">
+            <span>{copy.surgeries}</span>
+            <input
+              value={intake.surgeries}
+              onChange={(event) => setField('surgeries', event.target.value)}
+              className="h-10 w-full rounded-xl border border-border bg-background px-3 text-xs text-foreground outline-none transition-colors focus:border-primary"
+              placeholder={lang === 'ar' ? 'مثال: استئصال الزائدة 2023' : 'Example: appendectomy in 2023'}
+            />
+          </label>
+
+          <label className="col-span-2 space-y-1 text-[11px] text-muted-foreground">
+            <span>{copy.homeReadings}</span>
+            <input
+              value={intake.homeReadings}
+              onChange={(event) => setField('homeReadings', event.target.value)}
+              className="h-10 w-full rounded-xl border border-border bg-background px-3 text-xs text-foreground outline-none transition-colors focus:border-primary"
+              placeholder={lang === 'ar' ? 'مثال: ضغط 150/95، سكر 220' : 'Example: BP 150/95, glucose 220'}
+            />
+          </label>
+
+          <label className="col-span-2 space-y-1 text-[11px] text-muted-foreground">
+            <span>{copy.recentExposure}</span>
+            <input
+              value={intake.recentExposure}
+              onChange={(event) => setField('recentExposure', event.target.value)}
+              className="h-10 w-full rounded-xl border border-border bg-background px-3 text-xs text-foreground outline-none transition-colors focus:border-primary"
+              placeholder={lang === 'ar' ? 'مثال: مريض في المنزل، سفر، أكل ملوث' : 'Example: sick contact, travel, suspicious food'}
             />
           </label>
         </div>
