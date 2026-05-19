@@ -2,7 +2,8 @@ import { Toaster } from "@/components/ui/toaster"
 import { Toaster as Sonner } from "sonner"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter, HashRouter, Route, Routes } from 'react-router-dom';
+import { useEffect } from 'react';
+import { BrowserRouter, HashRouter, Route, Routes, useLocation } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { LanguageProvider } from '@/lib/LanguageContext';
@@ -37,11 +38,17 @@ import Register from '@/pages/Register';
 import UserProfile from '@/pages/UserProfile';
 import DoctorDashboard from '@/pages/DoctorDashboard';
 import PatientStoryDetail from '@/pages/PatientStoryDetail';
+import { trackPublicSiteVisit } from '@/lib/visit-tracker';
 
 const Router = import.meta.env.VITE_ROUTER_MODE === 'hash' ? HashRouter : BrowserRouter;
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings } = useAuth();
+  const location = useLocation();
+
+  useEffect(() => {
+    void trackPublicSiteVisit(location.pathname, location.search);
+  }, [location.pathname, location.search]);
 
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
