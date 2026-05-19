@@ -12,7 +12,16 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp
 export default function VerifyEmail() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, isAuthenticated, isLoadingAuth, refreshUser, logout } = useAuth();
+  const {
+    user,
+    isAuthenticated,
+    isLoadingAuth,
+    refreshUser,
+    logout,
+    pendingOtpChallenge,
+    verifyOtpChallenge,
+    resendOtpChallenge,
+  } = useAuth();
   const { lang } = useLanguage();
   const isArabic = lang === 'ar';
   const [code, setCode] = useState('');
@@ -31,13 +40,20 @@ export default function VerifyEmail() {
     );
   }
 
-  if (!isAuthenticated) {
+  const hasAuthenticatedVerification = isAuthenticated && user?.email_verified === false;
+  const hasPendingChallenge = !isAuthenticated && pendingOtpChallenge;
+
+  if (!hasAuthenticatedVerification && !hasPendingChallenge) {
     return <Navigate to="/login" replace />;
   }
 
-  if (user?.email_verified) {
+  if (isAuthenticated && user?.email_verified) {
     return <Navigate to={redirectTo} replace />;
   }
+
+  const email = pendingOtpChallenge?.email || user?.email;
+  const isLoginChallenge = pendingOtpChallenge?.purpose === 'login';
+  const isRegisterChallenge = pendingOtpChallenge?.purpose === 'register';
 
   const handleVerify = async (event) => {
     event.preventDefault();
@@ -50,9 +66,18 @@ export default function VerifyEmail() {
     setIsSubmitting(true);
 
     try {
-      await verifyEmailOtp(code);
-      await refreshUser();
-      toast.success(isArabic ? 'تم توثيق البريد الإلكتروني.' : 'Email verified successfully.');
+      if (hasPendingChallenge) {
+        await verifyOtpChallenge(code);
+      } else {
+        await verifyEmailOtp(code);
+        await refreshUser();
+      }
+
+      toast.success(
+        isArabic
+          ? (isLoginChallenge ? 'تم تأكيد تسجيل الدخول.' : 'تم توثيق البريد الإلكتروني.')
+          : (isLoginChallenge ? 'Sign in confirmed successfully.' : 'Email verified successfully.')
+      );
       navigate(redirectTo, { replace: true });
     } catch (error) {
       const message = error instanceof ApiError
@@ -68,7 +93,12 @@ export default function VerifyEmail() {
     setIsResending(true);
 
     try {
-      await resendEmailVerificationCode();
+      if (hasPendingChallenge) {
+        await resendOtpChallenge();
+      } else {
+        await resendEmailVerificationCode();
+      }
+
       toast.success(isArabic ? 'تم إرسال رمز جديد إلى بريدك.' : 'A new code has been sent to your email.');
     } catch (error) {
       toast.error(error instanceof ApiError ? error.message : (isArabic ? 'تعذر إعادة الإرسال.' : 'Unable to resend the code.'));
@@ -85,12 +115,14 @@ export default function VerifyEmail() {
             <MailCheck className="h-6 w-6 text-primary" />
           </div>
           <CardTitle className="text-3xl font-serif">
-            {isArabic ? 'تحقق من بريدك الإلكتروني' : 'Verify your email'}
+            {isArabic
+              ? (isLoginChallenge ? 'أدخل رمز تسجيل الدخول' : 'تحقق من بريدك الإلكتروني')
+              : (isLoginChallenge ? 'Enter your sign-in code' : 'Verify your email')}
           </CardTitle>
           <CardDescription>
             {isArabic
-              ? `أرسلنا رمزًا من 6 أرقام إلى ${user?.email}. أدخله لإكمال تفعيل حسابك.`
-              : `We sent a 6-digit code to ${user?.email}. Enter it to finish activating your account.`}
+              ? `أرسلنا رمزًا من 6 أرقام إلى ${email}. أدخله ${isLoginChallenge ? 'لإكمال تسجيل الدخول' : 'لإكمال تفعيل حسابك'}.`
+              : `We sent a 6-digit code to ${email}. Enter it ${isLoginChallenge ? 'to complete your sign in' : 'to finish activating your account'}.`}
           </CardDescription>
         </CardHeader>
         <CardContent>

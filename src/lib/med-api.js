@@ -152,6 +152,11 @@ export function requestPasswordReset(email) {
 }
 
 export async function logout() {
+  if (!getAccessToken()) {
+    clearAccessToken();
+    return;
+  }
+
   try {
     await apiRequest('/logout', { method: 'POST' });
   } finally {
@@ -173,6 +178,26 @@ export function verifyEmailOtp(code) {
   return apiRequest('/email/verify-otp', {
     method: 'POST',
     body: JSON.stringify({ code }),
+  });
+}
+
+export function verifyAuthOtp({ email, code, purpose }) {
+  return apiRequest('/auth/verify-otp', {
+    method: 'POST',
+    body: JSON.stringify({ email, code, purpose }),
+  }).then((payload) => {
+    if (payload?.token) {
+      setAccessToken(payload.token);
+    }
+
+    return payload;
+  });
+}
+
+export function resendAuthOtp({ email, purpose }) {
+  return apiRequest('/auth/resend-otp', {
+    method: 'POST',
+    body: JSON.stringify({ email, purpose }),
   });
 }
 

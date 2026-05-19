@@ -26,11 +26,21 @@ export default function Login() {
     event.preventDefault();
 
     try {
-      const user = await login({ email, password });
+      const result = await login({ email, password });
+
+      if (result?.requiresOtp) {
+        toast.success(isArabic ? 'تم إرسال رمز التحقق إلى بريدك.' : 'A verification code has been sent to your email.');
+        navigate('/verify-email', {
+          replace: true,
+          state: { from: { pathname: redirectTo } },
+        });
+        return;
+      }
+
       toast.success(isArabic ? 'تم تسجيل الدخول بنجاح.' : 'Signed in successfully.');
-      navigate(user?.email_verified ? redirectTo : '/verify-email', {
+      navigate(result?.email_verified ? redirectTo : '/verify-email', {
         replace: true,
-        state: user?.email_verified ? undefined : { from: { pathname: redirectTo } },
+        state: result?.email_verified ? undefined : { from: { pathname: redirectTo } },
       });
     } catch (error) {
       const message = error instanceof ApiError

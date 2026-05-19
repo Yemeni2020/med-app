@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { ApiError, clearAccessToken, getAccessToken, getCurrentUser, getMedSetting, getProfile, login as loginRequest, logout as logoutRequest, registerPatient, updateProfile as updateProfileRequest } from '@/lib/med-api';
+import { ApiError, clearAccessToken, getAccessToken, getCurrentUser, getMedSetting, getProfile, login as loginRequest, logout as logoutRequest, registerPatient, resendAuthOtp as resendAuthOtpRequest, updateProfile as updateProfileRequest, verifyAuthOtp as verifyAuthOtpRequest } from '@/lib/med-api';
 
 const AuthContext = createContext(null);
+const OTP_CHALLENGE_KEY = 'med-app-pending-otp-challenge';
 
 function getLocalizedValue(value, lang, fallback = '') {
   if (!value || typeof value !== 'object') {
@@ -26,6 +27,31 @@ function mapPublicSettings(payload) {
   };
 }
 
+function getStoredOtpChallenge() {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  try {
+    const raw = window.sessionStorage.getItem(OTP_CHALLENGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function storeOtpChallenge(challenge) {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  if (challenge) {
+    window.sessionStorage.setItem(OTP_CHALLENGE_KEY, JSON.stringify(challenge));
+  } else {
+    window.sessionStorage.removeItem(OTP_CHALLENGE_KEY);
+  }
+}
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(Boolean(getAccessToken()));
@@ -34,6 +60,7 @@ export function AuthProvider({ children }) {
   const [authError, setAuthError] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [appPublicSettings, setAppPublicSettings] = useState(null);
+  const [pendingOtpChallenge, setPendingOtpChallenge] = useState(() => getStoredOtpChallenge());
 
   useEffect(() => {
     let active = true;
@@ -111,6 +138,21 @@ export function AuthProvider({ children }) {
 
     try {
       const payload = await loginRequest(credentials);
+      if (payload?.requires_otp) {
+        const challenge = {
+          email: payload.email || credentials.email,
+          purpose: payload.otp_purpose || 'login',
+        };
+        setPendingOtpChallenge(challenge);
+        storeOtpChallenge(challenge);
+        setUser(null);
+        setIsAuthenticated(false);
+        setAuthChecked(true);
+        return { requiresOtp: true, ...challenge };
+      }
+
+      setPendingOtpChallenge(null);
+      storeOtpChallenge(null);
       setUser(payload.user);
       setIsAuthenticated(true);
       setAuthChecked(true);
@@ -131,6 +173,21 @@ export function AuthProvider({ children }) {
 
     try {
       const response = await registerPatient(payload);
+      if (response?.requires_otp) {
+        const challenge = {
+          email: response.email || payload.email,
+          purpose: response.otp_purpose || 'register',
+        };
+        setPendingOtpChallenge(challenge);
+        storeOtpChallenge(challenge);
+        setUser(null);
+        setIsAuthenticated(false);
+        setAuthChecked(true);
+        return { requiresOtp: true, ...challenge };
+      }
+
+      setPendingOtpChallenge(null);
+      storeOtpChallenge(null);
       setUser(response.user);
       setIsAuthenticated(true);
       setAuthChecked(true);
@@ -151,6 +208,8 @@ export function AuthProvider({ children }) {
     try {
       await logoutRequest();
     } finally {
+      setPendingOtpChallenge(null);
+      storeOtpChallenge(null);
       setUser(null);
       setIsAuthenticated(false);
       setAuthError(null);
@@ -171,6 +230,35 @@ export function AuthProvider({ children }) {
     return profile;
   };
 
+  const verifyOtpChallenge = async (code) => {
+    if (!pendingOtpChallenge) {
+      throw new Error('No pending OTP challenge.');
+    }
+
+    const response = await verifyAuthOtpRequest({
+      email: pendingOtpChallenge.email,
+      purpose: pendingOtpChallenge.purpose,
+      code,
+    });
+
+    setPendingOtpChallenge(null);
+    storeOtpChallenge(null);
+    setUser(response.user);
+    setIsAuthenticated(true);
+    setAuthError(null);
+    setAuthChecked(true);
+
+    return response.user;
+  };
+
+  const resendOtpChallenge = async () => {
+    if (!pendingOtpChallenge) {
+      throw new Error('No pending OTP challenge.');
+    }
+
+    return resendAuthOtpRequest(pendingOtpChallenge);
+  };
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -180,12 +268,15 @@ export function AuthProvider({ children }) {
       authError,
       authChecked,
       appPublicSettings,
+      pendingOtpChallenge,
       login,
       register,
       logout,
       refreshUser,
       loadProfile,
       updateProfile,
+      verifyOtpChallenge,
+      resendOtpChallenge,
     }}
     >
       {children}
