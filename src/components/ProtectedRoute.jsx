@@ -19,6 +19,10 @@ export default function ProtectedRoute({ fallback = <DefaultFallback />, require
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
+  if (user?.email_verified === false) {
+    return <Navigate to="/verify-email" replace state={{ from: location }} />;
+  }
+
   if (requireAdmin && !['admin', 'manager'].includes(user?.role)) {
     return <Navigate to="/dashboard" replace />;
   }

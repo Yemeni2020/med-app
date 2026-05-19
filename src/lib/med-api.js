@@ -163,6 +163,19 @@ export function getCurrentUser() {
   return apiRequest('/user');
 }
 
+export function resendEmailVerificationCode() {
+  return apiRequest('/email/verification-notification', {
+    method: 'POST',
+  });
+}
+
+export function verifyEmailOtp(code) {
+  return apiRequest('/email/verify-otp', {
+    method: 'POST',
+    body: JSON.stringify({ code }),
+  });
+}
+
 export function getProfile() {
   return medApiRequest('/profile');
 }

@@ -26,9 +26,12 @@ export default function Login() {
     event.preventDefault();
 
     try {
-      await login({ email, password });
+      const user = await login({ email, password });
       toast.success(isArabic ? 'تم تسجيل الدخول بنجاح.' : 'Signed in successfully.');
-      navigate(redirectTo, { replace: true });
+      navigate(user?.email_verified ? redirectTo : '/verify-email', {
+        replace: true,
+        state: user?.email_verified ? undefined : { from: { pathname: redirectTo } },
+      });
     } catch (error) {
       const message = error instanceof ApiError
         ? error.payload?.errors?.email?.[0] || error.message

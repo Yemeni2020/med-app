@@ -38,6 +38,7 @@ import Register from '@/pages/Register';
 import UserProfile from '@/pages/UserProfile';
 import DoctorDashboard from '@/pages/DoctorDashboard';
 import PatientStoryDetail from '@/pages/PatientStoryDetail';
+import VerifyEmail from '@/pages/VerifyEmail';
 import { trackPublicSiteVisit } from '@/lib/visit-tracker';
 
 const Router = import.meta.env.VITE_ROUTER_MODE === 'hash' ? HashRouter : BrowserRouter;
@@ -91,6 +92,7 @@ const AuthenticatedApp = () => {
 
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

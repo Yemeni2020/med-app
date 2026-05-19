@@ -58,8 +58,8 @@ export default function Register() {
         phone: '',
         phoneCountryCode: '',
       });
-      toast.success(isArabic ? 'تم إنشاء الحساب بنجاح.' : 'Account created successfully.');
-      navigate('/dashboard', { replace: true });
+      toast.success(isArabic ? 'تم إنشاء الحساب وإرسال رمز التحقق.' : 'Account created and verification code sent.');
+      navigate('/verify-email', { replace: true });
     } catch (error) {
       const message = error instanceof ApiError
         ? Object.values(error.payload?.errors || {}).flat()[0] || error.message
