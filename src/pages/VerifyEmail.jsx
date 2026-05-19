@@ -43,17 +43,18 @@ export default function VerifyEmail() {
   const hasAuthenticatedVerification = isAuthenticated && user?.email_verified === false;
   const hasPendingChallenge = !isAuthenticated && pendingOtpChallenge;
 
-  if (!hasAuthenticatedVerification && !hasPendingChallenge) {
-    return <Navigate to="/login" replace />;
-  }
-
   if (isAuthenticated && user?.email_verified) {
     return <Navigate to={redirectTo} replace />;
+  }
+
+  if (!hasAuthenticatedVerification && !hasPendingChallenge) {
+    return <Navigate to="/login" replace />;
   }
 
   const email = pendingOtpChallenge?.email || user?.email;
   const isLoginChallenge = pendingOtpChallenge?.purpose === 'login';
   const isRegisterChallenge = pendingOtpChallenge?.purpose === 'register';
+  const debugOtpCode = pendingOtpChallenge?.debugOtpCode;
 
   const handleVerify = async (event) => {
     event.preventDefault();
@@ -124,6 +125,13 @@ export default function VerifyEmail() {
               ? `أرسلنا رمزًا من 6 أرقام إلى ${email}. أدخله ${isLoginChallenge ? 'لإكمال تسجيل الدخول' : 'لإكمال تفعيل حسابك'}.`
               : `We sent a 6-digit code to ${email}. Enter it ${isLoginChallenge ? 'to complete your sign in' : 'to finish activating your account'}.`}
           </CardDescription>
+          {debugOtpCode ? (
+            <div className="rounded-2xl border border-amber-300/70 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+              {isArabic
+                ? `وضع التطوير: استخدم الرمز ${debugOtpCode}`
+                : `Development mode: use code ${debugOtpCode}`}
+            </div>
+          ) : null}
         </CardHeader>
         <CardContent>
           <form onSubmit={handleVerify} className="space-y-6">

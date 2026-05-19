@@ -66,54 +66,61 @@ export function AuthProvider({ children }) {
     let active = true;
 
     async function bootstrap() {
-      try {
-        const settings = await getMedSetting('med_app_public');
-        if (active) {
-          setAppPublicSettings(mapPublicSettings(settings));
-        }
-      } catch {
-        if (active) {
-          setAppPublicSettings(null);
-        }
-      } finally {
-        if (active) {
-          setIsLoadingPublicSettings(false);
-        }
-      }
-
       const token = getAccessToken();
-      if (!token) {
-        if (active) {
-          setUser(null);
-          setIsAuthenticated(false);
-          setIsLoadingAuth(false);
-          setAuthChecked(true);
-        }
-        return;
-      }
 
-      try {
-        const currentUser = await getCurrentUser();
-        if (active) {
-          setUser(currentUser);
-          setIsAuthenticated(true);
-          setAuthError(null);
-        }
-      } catch (error) {
-        if (active) {
-          if (error instanceof ApiError && error.status === 401) {
-            clearAccessToken();
+      const settingsPromise = getMedSetting('med_app_public')
+        .then((settings) => {
+          if (active) {
+            setAppPublicSettings(mapPublicSettings(settings));
           }
-          setUser(null);
-          setIsAuthenticated(false);
-          setAuthError(error);
+        })
+        .catch(() => {
+          if (active) {
+            setAppPublicSettings(null);
+          }
+        })
+        .finally(() => {
+          if (active) {
+            setIsLoadingPublicSettings(false);
+          }
+        });
+
+      const authPromise = (async () => {
+        if (!token) {
+          if (active) {
+            setUser(null);
+            setIsAuthenticated(false);
+            setIsLoadingAuth(false);
+            setAuthChecked(true);
+          }
+          return;
         }
-      } finally {
-        if (active) {
-          setIsLoadingAuth(false);
-          setAuthChecked(true);
+
+        try {
+          const currentUser = await getCurrentUser();
+          if (active) {
+            setUser(currentUser);
+            setIsAuthenticated(true);
+            setAuthError(null);
+          }
+        } catch (error) {
+          if (active) {
+            if (error instanceof ApiError && error.status === 401) {
+              clearAccessToken();
+            }
+            setUser(null);
+            setIsAuthenticated(false);
+            setAuthError(error);
+          }
+        } finally {
+          if (active) {
+            setIsLoadingAuth(false);
+            setAuthChecked(true);
+          }
         }
-      }
+      })();
+
+      await Promise.allSettled([settingsPromise, authPromise]);
     }
 
     bootstrap();
@@ -142,6 +149,7 @@ export function AuthProvider({ children }) {
         const challenge = {
           email: payload.email || credentials.email,
           purpose: payload.otp_purpose || 'login',
+          debugOtpCode: payload.debug_otp_code || null,
         };
         setPendingOtpChallenge(challenge);
         storeOtpChallenge(challenge);
@@ -177,6 +185,7 @@ export function AuthProvider({ children }) {
         const challenge = {
           email: response.email || payload.email,
           purpose: response.otp_purpose || 'register',
+          debugOtpCode: response.debug_otp_code || null,
         };
         setPendingOtpChallenge(challenge);
         storeOtpChallenge(challenge);
@@ -256,7 +265,16 @@ export function AuthProvider({ children }) {
       throw new Error('No pending OTP challenge.');
     }
 
-    return resendAuthOtpRequest(pendingOtpChallenge);
+    const response = await resendAuthOtpRequest(pendingOtpChallenge);
+    const nextChallenge = {
+      ...pendingOtpChallenge,
+      debugOtpCode: response?.debug_otp_code || null,
+    };
+
+    setPendingOtpChallenge(nextChallenge);
+    storeOtpChallenge(nextChallenge);
+
+    return response;
   };
 
   return (

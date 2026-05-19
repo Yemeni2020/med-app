@@ -1,4 +1,8 @@
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+const API_BASE_URL = (
+  import.meta.env.VITE_API_BASE_URL
+  || import.meta.env.VITE_BACKEND_URL
+  || ''
+).replace(/\/$/, '');
 const CLIENT_ID_KEY = 'med-app-client-id';
 const ACCESS_TOKEN_KEY = 'med-app-access-token';
 const API_PREFIX = '/api/v1';

@@ -44,14 +44,14 @@ import { trackPublicSiteVisit } from '@/lib/visit-tracker';
 const Router = import.meta.env.VITE_ROUTER_MODE === 'hash' ? HashRouter : BrowserRouter;
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings } = useAuth();
+  const { isLoadingAuth } = useAuth();
   const location = useLocation();
 
   useEffect(() => {
     void trackPublicSiteVisit(location.pathname, location.search);
   }, [location.pathname, location.search]);
 
-  if (isLoadingPublicSettings || isLoadingAuth) {
+  if (isLoadingAuth) {
     return (
       <div className="fixed inset-0 flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
